@@ -1,4 +1,4 @@
-﻿import type { Collection } from 'tinacms';
+import type { Collection } from 'tinacms';
 import { heroBlockSchema } from '../../src/components/blocks/hero.template';
 import { featuresBlockSchema } from '../../src/components/blocks/features.template';
 import { statsBlockSchema } from '../../src/components/blocks/stats.template';

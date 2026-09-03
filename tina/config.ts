@@ -8,6 +8,8 @@ import { UserCollection } from "./collections/user";
 
 // Your hosting provider likely exposes this as an environment variable
 const branch =
+  process.env.TINA_BRANCH ||
+  process.env.PUBLIC_TINA_BRANCH ||
   process.env.GITHUB_BRANCH ||
   process.env.VERCEL_GIT_COMMIT_REF ||
   process.env.WORKERS_CI_BRANCH || // Cloudflare Workers Builds

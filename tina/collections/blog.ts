@@ -1,4 +1,4 @@
-﻿import type { Collection } from "tinacms";
+import type { Collection } from "tinacms";
 import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
 import { seoFields } from "../fields/seo";
 import { viewFrontendField } from "../fields/view-frontend";
