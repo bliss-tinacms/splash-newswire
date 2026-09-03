@@ -68,3 +68,14 @@ deno.lock
 .netlify
 .wrangler
 dist
+
+
+node_modules
+dist
+.astro
+_hermes-backups
+_hermes-disabled
+.env
+.env.local
+.env.production
+*.zip
