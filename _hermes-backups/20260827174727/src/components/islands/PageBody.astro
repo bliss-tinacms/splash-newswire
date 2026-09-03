@@ -1,0 +1,21 @@
+---
+import Blocks from '../blocks/Blocks.astro';
+import AboutMockup17Block from '../blocks/AboutMockup17Block.astro';
+
+const { data } = Astro.props;
+const pageBlocks = Array.isArray(data?.blocks) ? data.blocks : [];
+const isAboutMockup17Block = (block) =>
+  block?._template === 'aboutMockup17' ||
+  block?.__typename === 'PageBlocksAboutMockup17';
+const aboutMockup17Block = pageBlocks.find(isAboutMockup17Block);
+const regularBlocks = pageBlocks.filter((block) => !isAboutMockup17Block(block));
+const showPageTitle = Boolean(data?.title && data?._sys?.filename !== 'home' && !aboutMockup17Block);
+---
+
+{data && (
+  <>
+    {showPageTitle && <h1 class="single-page-title">{data.title}</h1>}
+    {aboutMockup17Block && <AboutMockup17Block data={aboutMockup17Block} />}
+    {regularBlocks.length > 0 && <Blocks data={{ ...data, blocks: regularBlocks }} />}
+  </>
+)}

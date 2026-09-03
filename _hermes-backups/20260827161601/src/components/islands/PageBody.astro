@@ -1,0 +1,34 @@
+---
+import AboutMockup17Block from '../blocks/AboutMockup17Block.astro';
+import Blocks from '../blocks/Blocks.astro';
+import type { CmsPage } from '../../lib/data';
+
+interface Props {
+	data?: CmsPage | null;
+}
+
+const { data } = Astro.props;
+const filename = data?._sys?.filename ?? '';
+
+// HERMES_ABOUT_MOCKUP17_RENDER_START
+const allPageBlocks = Array.isArray(data?.blocks) ? data.blocks : [];
+const aboutMockup17Block = allPageBlocks.find((block) => block?._template === 'aboutMockup17');
+const nonAboutMockup17Blocks = allPageBlocks.filter((block) => block?._template !== 'aboutMockup17');
+// HERMES_ABOUT_MOCKUP17_RENDER_END
+
+const showPageTitle = !aboutMockup17Block && (Boolean(data?.title && filename !== 'home'));
+
+---
+{data && (
+	<>
+		{showPageTitle && (
+			<header class="page-title-header">
+				<div class="site-wrap">
+					<h1 class="single-page-title">{data.title}</h1>
+				</div>
+			</header>
+		)}
+		{aboutMockup17Block && <AboutMockup17Block data={aboutMockup17Block} />}
+    {nonAboutMockup17Blocks.length > 0 && <Blocks data={{...data, blocks: nonAboutMockup17Blocks}} />}
+	</>
+)}

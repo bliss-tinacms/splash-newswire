@@ -1,44 +1,23 @@
 {
   "seo": {
-    "title": "TinaCMS + Astro",
-    "description": "Welcome to my website!",
-    "siteOwner": "TinaCMS",
-    "logo": "/orange-llama.svg"
+    "title": "Harbor Post",
+    "description": "An independent local newsroom covering the harbor counties. We attend the meetings, file the requests, and publish what the record shows.",
+    "siteOwner": "Harbor Post",
+    "logo": "/Splash-Newswire-Logo-Medium.png",
+    "footerLogo": "/Splash-Newswire-Logo-White.png"
   },
-  "nav": [
-    {
-      "title": "Home",
-      "link": "/"
-    },
-    {
-      "title": "Blog",
-      "link": "/blog"
-    },
-    {
-      "title": "About",
-      "link": "/about"
-    }
-  ],
-  "contactLinks": [
-    {
-      "title": "X",
-      "link": "https://x.com/tinacms",
-      "icon": "tabler:brand-x"
-    },
-    {
-      "title": "Docs",
-      "link": "https://tina.io/docs",
-      "icon": "tabler:book-2"
-    },
-    {
-      "title": "GitHub",
-      "link": "https://github.com/tinacms/tinacms",
-      "icon": "tabler:brand-github"
-    },
-    {
-      "title": "Discord",
-      "link": "https://tina.io/discord",
-      "icon": "tabler:brand-discord"
-    }
-  ]
+  "contactForm": {
+    "formspreeEndpoint": "https://formspree.io/f/mwlejdvo",
+    "heading": "You live here. You see things we don't.",
+    "description": "Story tips, correction requests, contributor inquiries, and general reader correspondence all reach a person on the newsroom staff.",
+    "buttonText": "Send to the newsroom",
+    "note": "Read by a person during business hours. We reply to what we can pursue, and nothing runs on a single source.",
+    "subject": "New Harbor Post contact form submission"
+  },
+  "codeInjection": {
+    "headerCode": "",
+    "footerCode": ""
+  },
+  "contactLinks": [],
+  "footerStarfield": false
 }

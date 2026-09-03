@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import { listBlogs, listPages, getConfig } from '../lib/data';
+import { getBlogPermalink, getPageRouteSlug } from '../lib/permalinks';
+
+const config = (await getConfig()).data?.config ?? null;
+const pages = await listPages();
+const posts = await listBlogs();
+
+const title = 'Sitemap | Splash Newswire';
+const description = 'Browse the pages and latest reporting published by Splash Newswire.';
+
+function cleanTitle(value: unknown, fallback = 'Untitled') {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+}
+
+function normalizeUrl(value: string) {
+  if (!value || value === '/') return '/';
+  return value.startsWith('/') ? value : '/' + value;
+}
+
+function pageUrl(page: any) {
+  const filename = page?._sys?.filename || '';
+  if (filename === 'home') return '/';
+  return normalizeUrl(getPageRouteSlug(page) || filename) + '/';
+}
+
+function isHiddenPage(page: any) {
+  const filename = page?._sys?.filename || '';
+  const url = pageUrl(page);
+  return Boolean(
+    page?.draft ||
+    page?.seo?.noindex ||
+    filename === '404' ||
+    filename === 'sitemap' ||
+    url === '/sitemap/'
+  );
+}
+
+function isHiddenPost(post: any) {
+  return Boolean(post?.draft || post?.seo?.noindex);
+}
+
+const pageLinks = pages
+  .filter((page) => !isHiddenPage(page))
+  .map((page) => ({
+    title: cleanTitle(page.title || page.seoTitle, page?._sys?.filename || 'Page'),
+    url: pageUrl(page),
+  }))
+  .sort((a, b) => {
+    if (a.url === '/') return -1;
+    if (b.url === '/') return 1;
+    return a.title.localeCompare(b.title);
+  });
+
+const postLinks = posts
+  .filter((post) => !isHiddenPost(post))
+  .map((post) => ({
+    title: cleanTitle(post.title, post?._sys?.filename || 'Story'),
+    url: getBlogPermalink(post) + '/',
+    date: post.pubDate ? new Date(post.pubDate) : null,
+  }))
+  .sort((a, b) => Number(b.date || 0) - Number(a.date || 0));
+
+const totalLinks = pageLinks.length + postLinks.length;
+const updated = new Date();
+---
+
+<Base
+  title={title}
+  description={description}
+  ogTitle={title}
+  ogDescription={description}
+>
+  <main class="sitemap-template" aria-labelledby="sitemap-title">
+    <section class="sitemap-hero">
+      <div class="sitemap-wrap">
+        <p class="sitemap-eyebrow">Site index</p>
+        <h1 id="sitemap-title">Sitemap</h1>
+        <p>Browse all public pages and published stories from Splash Newswire.</p>
+        <div class="sitemap-stats" aria-label="Sitemap totals">
+          <span><strong>{pageLinks.length}</strong> Pages</span>
+          <span><strong>{postLinks.length}</strong> Stories</span>
+          <span><strong>{totalLinks}</strong> Total links</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sitemap-body">
+      <div class="sitemap-wrap sitemap-grid">
+        <section class="sitemap-group" aria-labelledby="sitemap-pages-title">
+          <div class="sitemap-group__header">
+            <p>Pages</p>
+            <h2 id="sitemap-pages-title">Website pages</h2>
+          </div>
+          {pageLinks.length > 0 ? (
+            <ul class="sitemap-list">
+              {pageLinks.map((item) => (
+                <li><a href={item.url}>{item.title}</a></li>
+              ))}
+            </ul>
+          ) : (
+            <p class="sitemap-empty">No public pages found.</p>
+          )}
+        </section>
+
+        <section class="sitemap-group" aria-labelledby="sitemap-posts-title">
+          <div class="sitemap-group__header">
+            <p>Stories</p>
+            <h2 id="sitemap-posts-title">Published reporting</h2>
+          </div>
+          {postLinks.length > 0 ? (
+            <ul class="sitemap-list sitemap-list--posts">
+              {postLinks.map((item) => (
+                <li>
+                  <a href={item.url}>{item.title}</a>
+                  {item.date && <time datetime={item.date.toISOString()}>{item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="sitemap-empty">No published stories found.</p>
+          )}
+        </section>
+      </div>
+    </section>
+  </main>
+</Base>

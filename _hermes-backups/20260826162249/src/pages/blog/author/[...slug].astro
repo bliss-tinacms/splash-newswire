@@ -1,0 +1,125 @@
+---
+import { getBlogPermalink } from '../../../lib/permalinks';
+import Base from '../../../layouts/Base.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import { getConfig, listBlogs, type CmsBlog } from '../../../lib/data';
+
+type ReferenceObject = {
+	title?: string | null;
+	name?: string | null;
+	_sys?: { filename?: string | null } | null;
+};
+
+type AuthorObject = ReferenceObject & {
+	role?: string | null;
+	avatar?: string | null;
+	bio?: string | null;
+};
+
+function getReferenceLabel(reference: unknown) {
+	if (!reference) return null;
+	if (typeof reference === 'string') {
+		return reference.split('/').pop()?.replace(/\.(json|mdx?)$/, '').replace(/-/g, ' ') ?? null;
+	}
+	if (typeof reference === 'object') {
+		const item = reference as ReferenceObject;
+		return String(item.title ?? item.name ?? '') || null;
+	}
+	return null;
+}
+
+function getReferenceSlug(reference: unknown) {
+	if (!reference) return null;
+	if (typeof reference === 'string') return reference.split('/').pop()?.replace(/\.(json|mdx?)$/, '') || null;
+	if (typeof reference === 'object') {
+		const item = reference as ReferenceObject;
+		return item._sys?.filename || (item.title || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || null;
+	}
+	return null;
+}
+
+function getAuthor(reference: unknown) {
+	if (!reference || typeof reference !== 'object') return null;
+	return reference as AuthorObject;
+}
+
+function getPostUrl(post: CmsBlog) {
+	return getBlogPermalink(post) + '/';
+}
+
+export async function getStaticPaths() {
+	const posts = await listBlogs();
+	const authors = new Map<string, { name: string }>();
+	const getSlug = (reference: unknown) => {
+		if (!reference) return null;
+		if (typeof reference === 'string') return reference.split('/').pop()?.replace(/\.(json|mdx?)$/, '') || null;
+		if (typeof reference === 'object') {
+			const item = reference as ReferenceObject;
+			return item._sys?.filename || (item.title || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || null;
+		}
+		return null;
+	};
+	const getLabel = (reference: unknown) => {
+		if (!reference) return null;
+		if (typeof reference === 'string') return reference.split('/').pop()?.replace(/\.(json|mdx?)$/, '').replace(/-/g, ' ') ?? null;
+		if (typeof reference === 'object') {
+			const item = reference as ReferenceObject;
+			return String(item.title ?? item.name ?? '') || null;
+		}
+		return null;
+	};
+	for (const post of posts) {
+		const slug = getSlug(post.author);
+		const name = getLabel(post.author);
+		if (slug && name) authors.set(slug, { name });
+	}
+	return [...authors.entries()].map(([slug, author]) => ({
+		params: { slug },
+		props: { authorName: author.name },
+	}));
+}
+
+const slug = (Astro.params.slug ?? '').toString();
+const config = (await getConfig()).data?.config ?? null;
+const posts = (await listBlogs()).filter((post) => getReferenceSlug(post.author) === slug);
+const author = posts[0] ? getAuthor(posts[0].author) : null;
+const authorName = getReferenceLabel(posts[0]?.author) || Astro.props.authorName || 'Author';
+const title = `${authorName} Articles | ${config?.seo?.title || 'Harbor Post'}`;
+const description = author?.bio || `Read the latest articles published by ${authorName}.`;
+const initials = authorName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'HP';
+---
+
+<Base title={title} description={description}>
+	<main class="author-archive">
+		<div class="site-wrap">
+			<header class="author-archive__header">
+				<div class="author-archive__photo-wrap">
+					{author?.avatar ? (
+						<img src={author.avatar} alt={authorName} width={112} height={112} class="author-archive__photo" />
+					) : (
+						<span class="author-archive__placeholder" aria-hidden="true">{initials}</span>
+					)}
+				</div>
+				<div>
+					<p class="author-archive__label">Author Archive</p>
+					<h1>{authorName}</h1>
+					{author?.role && <p class="author-archive__role">{author.role}</p>}
+					{author?.bio && <p class="author-archive__bio">{author.bio}</p>}
+				</div>
+			</header>
+			<section class="author-archive__posts" aria-label={`${authorName} articles`}>
+				{posts.map((post) => (
+					<a href={getPostUrl(post)} class="author-archive-card">
+						{post.heroImage && <img src={post.heroImage} alt="" class="author-archive-card__image" width={360} height={220} />}
+						<span class="author-archive-card__body">
+							<span class="author-archive-card__kicker">{getReferenceLabel(post.category) || 'Article'}</span>
+							<span class="author-archive-card__title">{post.title}</span>
+							{post.pubDate && <span class="author-archive-card__date"><FormattedDate date={new Date(post.pubDate)} /></span>}
+							{post.description && <span class="author-archive-card__excerpt">{post.description}</span>}
+						</span>
+					</a>
+				))}
+			</section>
+		</div>
+	</main>
+</Base>

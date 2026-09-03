@@ -7,8 +7,6 @@ export const contentBlockSchema: Template = {
 		{ type: 'rich-text', label: 'Body', name: 'body' },
 	],
 	ui: {
-		defaultItem: {
-			body: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio.',
-		},
+		defaultItem: {},
 	},
 };

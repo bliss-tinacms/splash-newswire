@@ -1,0 +1,23 @@
+---
+const { data = {} } = Astro.props;
+const coverageItems = Array.isArray(data.coverageItems) ? data.coverageItems : [];
+const standards = Array.isArray(data.standards) ? data.standards : [];
+const contacts = Array.isArray(data.contacts) ? data.contacts : [];
+const independenceImage = data.independenceImage || '/images/about-independence-demo.jpg';
+const independenceImageAlt = data.independenceImageAlt || 'Newsroom editorial independence';
+const independenceImageStyle = `background-image:url('${independenceImage}')`;
+const icon = (name = '') => {
+  if (name === 'alert') return '<svg class="about-nc-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
+  if (name === 'document') return '<svg class="about-nc-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>';
+  return '<svg class="about-nc-svg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+};
+---
+<section class="about-template">
+  <header class="about-ph"><div class="about-w"><div class="about-ph-kick"><i></i><span>{data.eyebrow}</span></div><h1>{data.headline}</h1><p class="about-ph-lede">{data.lede}</p></div></header>
+  <nav class="about-jump" aria-label="About page sections"><div class="about-w"><div class="about-jump-in"><a href="#purpose">Our Purpose</a><a href="#coverage">Coverage</a><a href="#standards">What We Stand For</a><a href="#independence">Independence</a><a href="#newsroom">Reach the Newsroom</a></div></div></nav>
+  <section id="purpose" class="about-pur"><div class="about-w"><div class="about-pur-in"><div class="about-pur-l"><div class="about-eye">{data.purposeEyebrow}</div><h2 class="about-h2">{data.purposeTitle}</h2></div><div class="about-pur-r"><p>{data.purposeParagraphOne}</p><p class="about-pur-pull">{data.purposePullquote}</p><p>{data.purposeParagraphTwo}</p></div></div></div></section>
+  <section id="coverage" class="about-cov"><div class="about-w"><div class="about-cov-h"><div class="about-eye">{data.coverageEyebrow}</div><h2 class="about-h2">{data.coverageTitle}</h2><p>{data.coverageIntro}</p></div><div class="about-cov-g">{coverageItems.map((item) => <a href={item.link || '#'} class="about-cv"><div class="about-cv-n">{item.number}</div><div class="about-cv-t">{item.title}</div><p class="about-cv-x">{item.text}</p></a>)}</div></div></section>
+  <section id="standards" class="about-std"><div class="about-w"><div class="about-std-h"><div class="about-std-eye"><i></i><span>{data.standardsEyebrow}</span><i></i></div><h2 class="about-h2">{data.standardsTitle}</h2><p>{data.standardsIntro}</p></div><div class="about-std-list">{standards.map((item) => <div class="about-sr"><div class="about-sr-n">{item.number}</div><div class="about-sr-t">{item.title}</div><p class="about-sr-x">{item.text}</p></div>)}</div></div></section>
+  <section id="independence" class="about-ind"><div class="about-ind-in"><div class="about-ind-img" aria-label={independenceImageAlt} style={independenceImageStyle}></div><div class="about-ind-b"><div class="about-ind-eye"><i></i><span>{data.independenceEyebrow}</span></div><h2>{data.independenceTitle}</h2><p>{data.independenceParagraphOne}</p><p>{data.independenceParagraphTwo}</p><a href={data.independenceButtonLink || '#'} class="about-lnk">{data.independenceButtonText}</a></div></div></section>
+  <section id="newsroom" class="about-nr"><div class="about-w"><div class="about-nr-h"><div class="about-std-eye"><i></i><span>{data.newsroomEyebrow}</span><i></i></div><h2 class="about-h2">{data.newsroomTitle}</h2><p>{data.newsroomIntro}</p></div><div class="about-nr-g">{contacts.map((item) => <a href={item.email ? 'mailto:' + item.email : '#'} class="about-nc"><div class="about-nc-i" set:html={icon(item.icon)} /><div class="about-nc-t">{item.title}</div><span class="about-nc-v">{item.email}</span><p class="about-nc-x">{item.text}</p></a>)}</div></div></section>
+</section>

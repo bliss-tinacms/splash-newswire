@@ -1,0 +1,107 @@
+﻿---
+import Base from '../layouts/Base.astro';
+
+const title = 'About Splash News Wire';
+const description = 'Splash News Wire publishes news, analysis, and reporting across the topics that shape American public life.';
+---
+
+<Base title={title} description={description}>
+  <main class="about-template">
+    <header class="about-ph">
+      <div class="about-w">
+        <div class="about-ph-kick"><i></i><span>About Splash News Wire</span></div>
+        <h1>An independent publication for American readers.</h1>
+        <p class="about-ph-lede">Splash News Wire publishes news, analysis, and reporting across the topics that shape American public life.</p>
+      </div>
+    </header>
+
+    <nav class="about-jump" aria-label="About page sections">
+      <div class="about-w">
+        <div class="about-jump-in">
+          <a href="#purpose">Our Purpose</a>
+          <a href="#coverage">Coverage</a>
+          <a href="#standards">What We Stand For</a>
+          <a href="#independence">Independence</a>
+          <a href="#newsroom">Reach the Newsroom</a>
+        </div>
+      </div>
+    </nav>
+
+    <section id="purpose" class="about-pur">
+      <div class="about-w">
+        <div class="about-pur-in">
+          <div class="about-pur-l">
+            <div class="about-eye">Why we publish</div>
+            <h2 class="about-h2">Our Purpose</h2>
+          </div>
+          <div class="about-pur-r">
+            <p>Splash News Wire exists to inform readers with clear, accurate, and useful reporting on the events, decisions, and developments that matter to daily life in the United States.</p>
+            <p class="about-pur-pull">Coverage that is neither watered down for the sake of speed nor bloated for the sake of length.</p>
+            <p>The publication aims to bring readers that standard of coverage, and to do so with a plainly stated set of editorial standards that any reader can hold us to.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="coverage" class="about-cov">
+      <div class="about-w">
+        <div class="about-cov-h">
+          <div class="about-eye">What we report on</div>
+          <h2 class="about-h2">Coverage</h2>
+          <p>Coverage aims to reflect both the major national stories of the day and the practical, useful reporting that helps readers make sense of what is happening in their communities and around them.</p>
+        </div>
+        <div class="about-cov-g">
+          <a href="/blog/category/national-news/" class="about-cv"><div class="about-cv-n">01</div><div class="about-cv-t">National News &amp; Politics</div><p class="about-cv-x">Government, public affairs, and the decisions shaping the national conversation.</p></a>
+          <a href="/blog/category/business/" class="about-cv"><div class="about-cv-n">02</div><div class="about-cv-t">Business &amp; Economy</div><p class="about-cv-x">Companies, markets, industries, and the economic forces reaching households.</p></a>
+          <a href="/blog/category/technology/" class="about-cv"><div class="about-cv-n">03</div><div class="about-cv-t">Technology</div><p class="about-cv-x">Innovation, digital trends, and the products changing how people live and work.</p></a>
+          <a href="/blog/category/science/" class="about-cv"><div class="about-cv-n">04</div><div class="about-cv-t">Health &amp; Science</div><p class="about-cv-x">Research, medical advances, and discoveries affecting everyday life.</p></a>
+          <a href="/blog/category/lifestyle/" class="about-cv"><div class="about-cv-n">05</div><div class="about-cv-t">Lifestyle &amp; Culture</div><p class="about-cv-x">Travel, entertainment, food, and the trends reflecting how people spend their time.</p></a>
+          <a href="/blog/" class="about-cv"><div class="about-cv-n">06</div><div class="about-cv-t">General-Interest Features</div><p class="about-cv-x">Practical reporting and features that put current events into perspective.</p></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="standards" class="about-std">
+      <div class="about-w">
+        <div class="about-std-h">
+          <div class="about-std-eye"><i></i><span>Editorial commitments</span><i></i></div>
+          <h2 class="about-h2">What We Stand For</h2>
+          <p>Five commitments govern the reporting. They are stated plainly so readers know what to expect and where to hold us to account.</p>
+        </div>
+        <div class="about-std-list">
+          <div class="about-sr"><div class="about-sr-n">01</div><div class="about-sr-t">Accuracy</div><p class="about-sr-x">Accuracy is the first commitment. Every factual claim published on the site should be verifiable, and errors discovered after publication are corrected openly on the record.</p></div>
+          <div class="about-sr"><div class="about-sr-n">02</div><div class="about-sr-t">Fairness</div><p class="about-sr-x">Fairness governs the treatment of the people and organizations covered in the reporting. Subjects of substantive allegations are given a meaningful opportunity to respond before publication, and the reporting reflects that response where it is given.</p></div>
+          <div class="about-sr"><div class="about-sr-n">03</div><div class="about-sr-t">Independence</div><p class="about-sr-x">Independence from commercial pressure is protected as a matter of editorial practice. Coverage decisions are made by the editorial team on the merits of the story, not on the basis of advertising or sponsorship relationships.</p></div>
+          <div class="about-sr"><div class="about-sr-n">04</div><div class="about-sr-t">Transparency</div><p class="about-sr-x">Transparency about the kind of piece a reader is looking at matters. News reporting, analysis, opinion, and sponsored content are labeled clearly and kept visibly distinct.</p></div>
+          <div class="about-sr"><div class="about-sr-n">05</div><div class="about-sr-t">Accessible Language</div><p class="about-sr-x">Accessibility of language matters as well. Reporting is written for a general reader, without unnecessary jargon.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="independence" class="about-ind">
+      <div class="about-ind-in">
+        <div class="about-ind-img" aria-hidden="true"></div>
+        <div class="about-ind-b">
+          <div class="about-ind-eye"><i></i><span>A note on independence</span></div>
+          <h2>The editorial side is kept separate from the commercial side.</h2>
+          <p>Splash News Wire is editorially independent. The publication accepts advertising and, on occasion, sponsored content, but the editorial operation is kept separate from the commercial side of the site.</p>
+          <p>Advertisers and sponsors do not review, approve, or influence editorial coverage before publication.</p>
+          <a href="/sponsored-content-policy/" class="about-lnk">Read the Sponsored Content Policy â†’</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="newsroom" class="about-nr">
+      <div class="about-w">
+        <div class="about-nr-h">
+          <div class="about-std-eye"><i></i><span>Get in touch</span><i></i></div>
+          <h2 class="about-h2">Reach the Newsroom</h2>
+          <p>Story tips, correction requests, letters from readers, and other correspondence intended for the editorial team reach the publication through the addresses below.</p>
+        </div>
+        <div class="about-nr-g">
+          <a href="mailto:editorial@splashnewswire.com" class="about-nc"><div class="about-nc-i" aria-hidden="true"><svg class="about-nc-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><div class="about-nc-t">Write for Us</div><span class="about-nc-v">contribute@splashnewswire.com</span><p class="about-nc-x">The submission process for outside contributors is set out on the Write for Us page.</p></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>

@@ -1,6 +1,11 @@
 ---
+import footerNavigation from '../content/navigation/footer.json';
+
+const footerMenuItems = (footerNavigation.items || []).filter((item) => item && item.label && item.href);
+---
+﻿---
 import { tinaField } from "@tinacms/astro/tina-field";
-import type { CmsConfig, CmsConfigContactLink } from '../lib/data';
+import type { CmsConfig, CmsConfigContactLink, CmsConfigFooterNav } from '../lib/data';
 import IconLink from "./IconLink.astro";
 import Starfield from './space/Starfield.astro';
 
@@ -10,14 +15,26 @@ interface Props {
 
 const { config } = Astro.props;
 const seo = config?.seo ?? null;
+const footerNav = (config?.footerNav ?? []).filter(
+	(item): item is CmsConfigFooterNav => item !== null,
+);
 const contactLinks = (config?.contactLinks ?? []).filter(
 	(item): item is CmsConfigContactLink => item !== null,
 );
 const today = new Date();
+import footerNavigation from '../content/navigation/footer.json';
+const footerMenuItems = (footerNavigation.items ?? []).filter((item) => item?.label && item?.href);
 ---
 <footer class="border-t bg-background py-12 text-center text-sm text-muted-foreground relative overflow-hidden">
 	{config?.footerStarfield !== false && <Starfield count={50} class="text-foreground/15" />}
 	<div class="relative flex flex-col items-center gap-6">
+		{footerNav.length > 0 && (
+			<div class="foot-legal">
+      {footerMenuItems.map((item) => (
+        <a href={item.href}>{item.label}</a>
+      ))}
+    </div>
+		)}
 		{contactLinks.length > 0 && (
 			<div class="flex justify-center gap-4">
 				{contactLinks.map((link) => (

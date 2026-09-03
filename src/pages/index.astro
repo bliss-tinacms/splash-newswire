@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
-import PageBody from '../components/islands/PageBody.astro';
-import { getConfig, getPage } from '../lib/data';
+import FrontPage from '../templates/FrontPage.astro';
+import { getConfig, getPage, listBlogs } from '../lib/data';
 import { islands } from '../lib/islands';
 
 const slug = 'home';
@@ -10,13 +10,23 @@ const page = await getPage(slug);
 const data = page.data?.page;
 if (!data) return new Response('Not Found', { status: 404 });
 const config = (await getConfig()).data?.config ?? null;
+const posts = await listBlogs();
+const seo = data.seo ?? null;
+const title = seo?.metaTitle || data.seoTitle || config?.seo?.title || 'Harbor Post';
+const description = seo?.metaDescription || config?.seo?.description || 'Independent local reporting for the harbor counties.';
 ---
 
 <Base
-	title={data.seoTitle || config?.seo?.title || 'TinaCMS + Astro'}
-	description={config?.seo?.description ?? 'Welcome to my website!'}
+	title={title}
+	description={description}
+	image={seo?.ogImage || undefined}
+	ogTitle={seo?.ogTitle || title}
+	ogDescription={seo?.ogDescription || description}
+	canonicalUrl={seo?.canonicalUrl || undefined}
+	noindex={seo?.noindex || false}
+	nofollow={seo?.nofollow || false}
 >
 	<TinaIsland name="page" wrapper={islands.page.wrapper} params={{ slug }} primary>
-		<PageBody data={data} />
+		<FrontPage posts={posts} config={config} data={data} />
 	</TinaIsland>
 </Base>

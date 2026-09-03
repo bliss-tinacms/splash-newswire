@@ -1,0 +1,76 @@
+---
+const { data = {} } = Astro.props;
+const hero = data.hero ?? {};
+const formSection = data.formSection ?? {};
+const inboxes = data.inboxes ?? {};
+const requests = data.requests ?? {};
+const inboxCards = Array.isArray(inboxes.cards) ? inboxes.cards : [];
+const requestCards = Array.isArray(requests.cards) ? requests.cards : [];
+const formAction = formSection.formAction || '';
+const formMethod = formAction ? 'POST' : undefined;
+const icon = (name = '') => {
+  if (name === 'document') return '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+  if (name === 'mail') return '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
+  return '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
+};
+---
+<section class="contact-template">
+  <header class="contact-ph"><div class="contact-w">
+    <div class="contact-ph-kick"><i></i><span>{hero.eyebrow}</span></div>
+    <h1>{hero.headline}</h1>
+    <p class="contact-ph-lede">{hero.lede}</p>
+  </div></header>
+
+  <section class="contact-main"><div class="contact-w"><div class="contact-main-in">
+    <div class="contact-fm">
+      <div class="contact-fm-eye"><i></i><span>{formSection.eyebrow}</span></div>
+      <h2>{formSection.title}</h2>
+      <p class="contact-fm-x">{formSection.description}</p>
+      <form action={formAction || undefined} method={formMethod} accept-charset="UTF-8">
+        {formSection.subject && <input type="hidden" name="_subject" value={formSection.subject} />}
+        <input type="text" name="_gotcha" class="contact-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="contact-f2">
+          <div class="contact-frow"><label class="contact-flab" for="contact-first-name">First Name</label><input class="contact-finp" id="contact-first-name" name="first_name" type="text" placeholder="First name" autocomplete="given-name" required /></div>
+          <div class="contact-frow"><label class="contact-flab" for="contact-last-name">Last Name</label><input class="contact-finp" id="contact-last-name" name="last_name" type="text" placeholder="Last name" autocomplete="family-name" required /></div>
+        </div>
+        <div class="contact-f2">
+          <div class="contact-frow"><label class="contact-flab" for="contact-email">Email</label><input class="contact-finp" id="contact-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required /></div>
+          <div class="contact-frow"><label class="contact-flab" for="contact-phone">Phone</label><input class="contact-finp" id="contact-phone" name="phone" type="tel" placeholder="(000) 000-0000" autocomplete="tel" /></div>
+        </div>
+        <div class="contact-frow"><label class="contact-flab" for="contact-message">Message</label><textarea class="contact-finp" id="contact-message" name="message" placeholder="What you would like us to know. Include links, dates, and documents where relevant." required></textarea></div>
+        <button class="contact-fbtn" type={formAction ? 'submit' : 'button'}>{formSection.buttonText}</button>
+        <p class="contact-fnote">{formSection.note}</p>
+      </form>
+    </div>
+
+    <aside class="contact-side">
+      <div class="contact-side-eye">{inboxes.eyebrow}</div>
+      <h2>{inboxes.title}</h2>
+      {inboxCards.map((item) => (
+        <div class="contact-ch">
+          <div class="contact-ch-t">{item.title}</div>
+          <p class="contact-ch-x">{item.description}</p>
+          {item.email && <a href={'mailto:' + item.email} class="contact-ch-a">{item.email}</a>}
+          <p class="contact-ch-note">{item.note}</p>
+        </div>
+      ))}
+    </aside>
+  </div></div></section>
+
+  <section class="contact-nt"><div class="contact-w">
+    <div class="contact-nt-h">
+      <div class="contact-nt-eye"><i></i><span>{requests.eyebrow}</span><i></i></div>
+      <h2>{requests.title}</h2>
+      <p>{requests.intro}</p>
+    </div>
+    <div class="contact-nt-g">
+      {requestCards.map((item) => (
+        <article class="contact-nc">
+          <div class="contact-nc-i" set:html={icon(item.icon)} />
+          <div class="contact-nc-t">{item.title}</div>
+          <p class="contact-nc-x">{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </div></section>
+</section>

@@ -1,0 +1,71 @@
+{
+  "title": "Primary Header Menu",
+  "items": [
+    {
+      "title": "About",
+      "link": "/about"
+    },
+    {
+      "title": "Trending",
+      "link": "#",
+      "children": [
+        {
+          "title": "National News",
+          "link": "/blog"
+        },
+        {
+          "title": "Politics",
+          "link": "/blog"
+        },
+        {
+          "title": "Business",
+          "link": "/blog"
+        },
+        {
+          "title": "Economy",
+          "link": "/blog"
+        },
+        {
+          "title": "Technology",
+          "link": "/blog"
+        },
+        {
+          "title": "Health",
+          "link": "/blog"
+        },
+        {
+          "title": "Science",
+          "link": "/blog"
+        },
+        {
+          "title": "Lifestyle",
+          "link": "/blog"
+        },
+        {
+          "title": "Culture",
+          "link": "/blog"
+        },
+        {
+          "title": "Featured",
+          "link": "/blog"
+        }
+      ]
+    },
+    {
+      "title": "Our Team",
+      "link": "/about"
+    },
+    {
+      "title": "Editorial Guidelines",
+      "link": "/about"
+    },
+    {
+      "title": "Blog",
+      "link": "/blog"
+    },
+    {
+      "title": "Contact",
+      "link": "/contact"
+    }
+  ]
+}

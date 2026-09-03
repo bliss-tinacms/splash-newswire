@@ -1,0 +1,1657 @@
+Splash Newswire blog collection repair debug
+Generated: 08/27/2026 21:58:46
+Project root: C:\Users\ADMIN\Desktop\Astro\tina-blog
+
+
+==================== CURRENT tina/collections/blog.ts ====================
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\tina\collections\blog.ts
+import type {
+      type: 'string',
+      name: 'listTitle',
+      label: 'List Title',
+      description: 'Auto-generated for Tina list display. Frontend still uses Title.',
+      ui: {
+    beforeSubmit: async ({ values }) => {
+      const normalizeCategoryLabel = (category: unknown) => {
+        if (!category) return '';
+        if (typeof category === 'object') {
+          const item = category as { title?: string; name?: string; _sys?: { filename?: string } };
+          return String(item.title || item.name || item._sys?.filename || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+        const raw = String(category).replace(/\\/g, '/').split('/').pop()?.replace(/\.(json|mdx?|ya?ml)$/i, '') || '';
+        return raw.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      };
+      const cleanTitle = String(values.title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+      const category = normalizeCategoryLabel(values.category);
+      return {
+        ...values,
+        title: cleanTitle,
+        listTitle: category ? '[' + category + '] ' + cleanTitle : cleanTitle,
+      };
+    },
+        component: () => null,
+      },
+    },
+    { Collection } from "tinacms";
+import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+import { seoFields } from "../fields/seo";
+
+function slugifyFilename(value?: string | null): string {
+  if (!value || typeof value !== "string") return "untitled";
+  let input = value.trim().toLowerCase();
+  if (!input) return "untitled";
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  if (input.startsWith("blog/")) input = input.slice(5);
+
+  let output = "";
+  let lastWasDash = false;
+  for (const ch of input) {
+    const isLetter = ch >= "a" && ch <= "z";
+    const isNumber = ch >= "0" && ch <= "9";
+    const isSlash = ch === "/";
+    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+    if (isAllowed) {
+      output += ch;
+      lastWasDash = false;
+    } else if (!lastWasDash) {
+      output += "-";
+      lastWasDash = true;
+    }
+  }
+
+  while (output.startsWith("-")) output = output.slice(1);
+  while (output.endsWith("-")) output = output.slice(0, -1);
+  while (output.includes("//")) output = output.split("//").join("/");
+  return output || "untitled";
+}
+
+export const BlogCollection: Collection = {
+  name: "blog",
+  label: "Blogs",
+  path: "src/content/blog",
+  format: "mdx",
+  ui: {
+    filename: {
+      readonly: false,
+      parse: (filename) => slugifyFilename(filename),
+      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+    },
+    router: ({ document }) => "/blog/" + document._sys.filename,
+  },
+  fields: [
+    viewFrontendField('blog'),
+    {
+      type: "string",
+      name: "title",
+      label: "Title",
+      required: true,
+    },
+    {
+      name: "permalink",
+      label: "Filename / Permalink",
+      type: "string",
+      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename.",
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "string",
+    },
+    seoFields,
+    {
+      name: "pubDate",
+      label: "Publication Date",
+      type: "datetime",
+    },
+    {
+      name: "updatedDate",
+      label: "Updated Date",
+      type: "datetime",
+    },
+    {
+      name: "category",
+      label: "Category",
+      type: "reference",
+      collections: ["category"],
+      description: "Assign this post to a category, similar to WordPress post categories.",
+    },
+    {
+      name: "author",
+      label: "Author / User",
+      type: "reference",
+      collections: ["user"],
+      description: "Assign this post to a user profile, similar to a WordPress post author.",
+    },
+    {
+      name: "heroImage",
+      label: "Hero Image",
+      type: "image",
+    },
+    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image." },
+    {
+      type: "rich-text",
+      name: "body",
+      label: "Body",
+      isBody: true,
+      templates: [youTubeEmbedTemplate],
+    },
+  ],
+};
+
+
+==================== package.json ====================
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\package.json
+{
+  "name": "tina-blog",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "tinacms dev -c \"astro dev\"",
+    "build": "tinacms build --content=local -c \"astro build\"",
+    "build:local": "tinacms build --local --skip-cloud-checks -c \"astro build\"",
+    "build:search": "tinacms search-index",
+    "preview": "astro preview",
+    "astro": "astro",
+    "permalink:sync": "node scripts/sync-permalinks-to-filenames.mjs",
+    "permalink:watch": "node scripts/watch-permalinks-to-filenames.mjs"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.7.0",
+    "@astrojs/mdx": "^6.0.2",
+    "@astrojs/netlify": "^7.0.13",
+    "@astrojs/node": "^10.1.4",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/vercel": "^10.0.8",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@iconify-json/tabler": "^1.2.35",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.3.0",
+    "@tinacms/astro": "^0.5.1",
+    "astro": "^6.4.4",
+    "astro-icon": "^1.1.5",
+    "clsx": "^2.1.1",
+    "sharp": "^0.34.5",
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.2.2",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@tinacms/cli": "^2.6.1",
+    "@tinacms/graphql": "^2.4.10",
+    "@types/node": "^25.9.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tinacms": "^3.12.1",
+    "typescript": "^6.0.3",
+    "vite": "^7.3.2"
+  }
+}
+
+
+==================== BLOG.TS BACKUPS ====================
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827135652\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 21:49:58
+Length: 4600
+1|import type {
+2|      type: 'string',
+3|      name: 'listTitle',
+4|      label: 'List Title',
+5|      description: 'Auto-generated for Tina list display. Frontend still uses Title.',
+6|      ui: {
+7|    beforeSubmit: async ({ values }) => {
+8|      const normalizeCategoryLabel = (category: unknown) => {
+9|        if (!category) return '';
+10|        if (typeof category === 'object') {
+11|          const item = category as { title?: string; name?: string; _sys?: { filename?: string } };
+12|          return String(item.title || item.name || item._sys?.filename || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+13|        }
+14|        const raw = String(category).replace(/\\/g, '/').split('/').pop()?.replace(/\.(json|mdx?|ya?ml)$/i, '') || '';
+15|        return raw.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+16|      };
+17|      const cleanTitle = String(values.title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+18|      const category = normalizeCategoryLabel(values.category);
+19|      return {
+20|        ...values,
+21|        title: cleanTitle,
+22|        listTitle: category ? '[' + category + '] ' + cleanTitle : cleanTitle,
+23|      };
+24|    },
+25|        component: () => null,
+26|      },
+27|    },
+28|    { Collection } from "tinacms";
+29|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+30|import { seoFields } from "../fields/seo";
+31|
+32|function slugifyFilename(value?: string | null): string {
+33|  if (!value || typeof value !== "string") return "untitled";
+34|  let input = value.trim().toLowerCase();
+35|  if (!input) return "untitled";
+36|
+37|  if (input.startsWith("http://") || input.startsWith("https://")) {
+38|    const parts = input.split("/");
+39|    input = parts.slice(3).join("/");
+40|  }
+41|
+42|  input = input.split("?")[0].split("#")[0];
+43|  input = input.split("\\").join("/");
+44|  while (input.startsWith("/")) input = input.slice(1);
+45|  while (input.endsWith("/")) input = input.slice(0, -1);
+46|  if (input.startsWith("blog/")) input = input.slice(5);
+47|
+48|  let output = "";
+49|  let lastWasDash = false;
+50|  for (const ch of input) {
+51|    const isLetter = ch >= "a" && ch <= "z";
+52|    const isNumber = ch >= "0" && ch <= "9";
+53|    const isSlash = ch === "/";
+54|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+55|    if (isAllowed) {
+56|      output += ch;
+57|      lastWasDash = false;
+58|    } else if (!lastWasDash) {
+59|      output += "-";
+60|      lastWasDash = true;
+61|    }
+62|  }
+63|
+64|  while (output.startsWith("-")) output = output.slice(1);
+65|  while (output.endsWith("-")) output = output.slice(0, -1);
+66|  while (output.includes("//")) output = output.split("//").join("/");
+67|  return output || "untitled";
+68|}
+69|
+70|export const BlogCollection: Collection = {
+71|  name: "blog",
+72|  label: "Blogs",
+73|  path: "src/content/blog",
+74|  format: "mdx",
+75|  ui: {
+76|    filename: {
+77|      readonly: false,
+78|      parse: (filename) => slugifyFilename(filename),
+79|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+80|    },
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827135703\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 21:49:58
+Length: 4600
+1|import type {
+2|      type: 'string',
+3|      name: 'listTitle',
+4|      label: 'List Title',
+5|      description: 'Auto-generated for Tina list display. Frontend still uses Title.',
+6|      ui: {
+7|    beforeSubmit: async ({ values }) => {
+8|      const normalizeCategoryLabel = (category: unknown) => {
+9|        if (!category) return '';
+10|        if (typeof category === 'object') {
+11|          const item = category as { title?: string; name?: string; _sys?: { filename?: string } };
+12|          return String(item.title || item.name || item._sys?.filename || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+13|        }
+14|        const raw = String(category).replace(/\\/g, '/').split('/').pop()?.replace(/\.(json|mdx?|ya?ml)$/i, '') || '';
+15|        return raw.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+16|      };
+17|      const cleanTitle = String(values.title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+18|      const category = normalizeCategoryLabel(values.category);
+19|      return {
+20|        ...values,
+21|        title: cleanTitle,
+22|        listTitle: category ? '[' + category + '] ' + cleanTitle : cleanTitle,
+23|      };
+24|    },
+25|        component: () => null,
+26|      },
+27|    },
+28|    { Collection } from "tinacms";
+29|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+30|import { seoFields } from "../fields/seo";
+31|
+32|function slugifyFilename(value?: string | null): string {
+33|  if (!value || typeof value !== "string") return "untitled";
+34|  let input = value.trim().toLowerCase();
+35|  if (!input) return "untitled";
+36|
+37|  if (input.startsWith("http://") || input.startsWith("https://")) {
+38|    const parts = input.split("/");
+39|    input = parts.slice(3).join("/");
+40|  }
+41|
+42|  input = input.split("?")[0].split("#")[0];
+43|  input = input.split("\\").join("/");
+44|  while (input.startsWith("/")) input = input.slice(1);
+45|  while (input.endsWith("/")) input = input.slice(0, -1);
+46|  if (input.startsWith("blog/")) input = input.slice(5);
+47|
+48|  let output = "";
+49|  let lastWasDash = false;
+50|  for (const ch of input) {
+51|    const isLetter = ch >= "a" && ch <= "z";
+52|    const isNumber = ch >= "0" && ch <= "9";
+53|    const isSlash = ch === "/";
+54|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+55|    if (isAllowed) {
+56|      output += ch;
+57|      lastWasDash = false;
+58|    } else if (!lastWasDash) {
+59|      output += "-";
+60|      lastWasDash = true;
+61|    }
+62|  }
+63|
+64|  while (output.startsWith("-")) output = output.slice(1);
+65|  while (output.endsWith("-")) output = output.slice(0, -1);
+66|  while (output.includes("//")) output = output.split("//").join("/");
+67|  return output || "untitled";
+68|}
+69|
+70|export const BlogCollection: Collection = {
+71|  name: "blog",
+72|  label: "Blogs",
+73|  path: "src/content/blog",
+74|  format: "mdx",
+75|  ui: {
+76|    filename: {
+77|      readonly: false,
+78|      parse: (filename) => slugifyFilename(filename),
+79|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+80|    },
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827134958\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 21:47:44
+Length: 4600
+1|import type {
+2|      type: 'string',
+3|      name: 'listTitle',
+4|      label: 'List Title',
+5|      description: 'Auto-generated for Tina list display. Frontend still uses Title.',
+6|      ui: {
+7|    beforeSubmit: async ({ values }) => {
+8|      const normalizeCategoryLabel = (category: unknown) => {
+9|        if (!category) return '';
+10|        if (typeof category === 'object') {
+11|          const item = category as { title?: string; name?: string; _sys?: { filename?: string } };
+12|          return String(item.title || item.name || item._sys?.filename || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+13|        }
+14|        const raw = String(category).replace(/\\/g, '/').split('/').pop()?.replace(/\.(json|mdx?|ya?ml)$/i, '') || '';
+15|        return raw.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+16|      };
+17|      const cleanTitle = String(values.title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+18|      const category = normalizeCategoryLabel(values.category);
+19|      return {
+20|        ...values,
+21|        title: cleanTitle,
+22|        listTitle: category ? '[' + category + '] ' + cleanTitle : cleanTitle,
+23|      };
+24|    },
+25|        component: () => null,
+26|      },
+27|    },
+28|    { Collection } from "tinacms";
+29|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+30|import { seoFields } from "../fields/seo";
+31|
+32|function slugifyFilename(value?: string | null): string {
+33|  if (!value || typeof value !== "string") return "untitled";
+34|  let input = value.trim().toLowerCase();
+35|  if (!input) return "untitled";
+36|
+37|  if (input.startsWith("http://") || input.startsWith("https://")) {
+38|    const parts = input.split("/");
+39|    input = parts.slice(3).join("/");
+40|  }
+41|
+42|  input = input.split("?")[0].split("#")[0];
+43|  input = input.split("\\").join("/");
+44|  while (input.startsWith("/")) input = input.slice(1);
+45|  while (input.endsWith("/")) input = input.slice(0, -1);
+46|  if (input.startsWith("blog/")) input = input.slice(5);
+47|
+48|  let output = "";
+49|  let lastWasDash = false;
+50|  for (const ch of input) {
+51|    const isLetter = ch >= "a" && ch <= "z";
+52|    const isNumber = ch >= "0" && ch <= "9";
+53|    const isSlash = ch === "/";
+54|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+55|    if (isAllowed) {
+56|      output += ch;
+57|      lastWasDash = false;
+58|    } else if (!lastWasDash) {
+59|      output += "-";
+60|      lastWasDash = true;
+61|    }
+62|  }
+63|
+64|  while (output.startsWith("-")) output = output.slice(1);
+65|  while (output.endsWith("-")) output = output.slice(0, -1);
+66|  while (output.includes("//")) output = output.split("//").join("/");
+67|  return output || "untitled";
+68|}
+69|
+70|export const BlogCollection: Collection = {
+71|  name: "blog",
+72|  label: "Blogs",
+73|  path: "src/content/blog",
+74|  format: "mdx",
+75|  ui: {
+76|    filename: {
+77|      readonly: false,
+78|      parse: (filename) => slugifyFilename(filename),
+79|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+80|    },
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827134744\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 21:45:32
+Length: 4682
+1|import type {
+2|      type: 'string',
+3|      name: 'listTitle',
+4|      label: 'List Title',
+5|      isTitle: true,
+6|      description: 'Auto-generated for Tina list display. Frontend still uses Title.',
+7|      ui: {
+8|    beforeSubmit: async ({ values }) => {
+9|      const normalizeCategoryLabel = (category: unknown) => {
+10|        if (!category) return '';
+11|        if (typeof category === 'object') {
+12|          const item = category as { title?: string; name?: string; _sys?: { filename?: string } };
+13|          return String(item.title || item.name || item._sys?.filename || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+14|        }
+15|        const raw = String(category).replace(/\\/g, '/').split('/').pop()?.replace(/\.(json|mdx?|ya?ml)$/i, '') || '';
+16|        return raw.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+17|      };
+18|      const cleanTitle = String(values.title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+19|      const category = normalizeCategoryLabel(values.category);
+20|      return {
+21|        ...values,
+22|        title: cleanTitle,
+23|        listTitle: category ? '[' + category + '] ' + cleanTitle : cleanTitle,
+24|      };
+25|    },
+26|        component: () => null,
+27|      },
+28|    },
+29|    { Collection } from "tinacms";
+30|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+31|import { seoFields } from "../fields/seo";
+32|import { viewFrontendField } from '../fields/view-frontend';
+33|
+34|function slugifyFilename(value?: string | null): string {
+35|  if (!value || typeof value !== "string") return "untitled";
+36|  let input = value.trim().toLowerCase();
+37|  if (!input) return "untitled";
+38|
+39|  if (input.startsWith("http://") || input.startsWith("https://")) {
+40|    const parts = input.split("/");
+41|    input = parts.slice(3).join("/");
+42|  }
+43|
+44|  input = input.split("?")[0].split("#")[0];
+45|  input = input.split("\\").join("/");
+46|  while (input.startsWith("/")) input = input.slice(1);
+47|  while (input.endsWith("/")) input = input.slice(0, -1);
+48|  if (input.startsWith("blog/")) input = input.slice(5);
+49|
+50|  let output = "";
+51|  let lastWasDash = false;
+52|  for (const ch of input) {
+53|    const isLetter = ch >= "a" && ch <= "z";
+54|    const isNumber = ch >= "0" && ch <= "9";
+55|    const isSlash = ch === "/";
+56|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+57|    if (isAllowed) {
+58|      output += ch;
+59|      lastWasDash = false;
+60|    } else if (!lastWasDash) {
+61|      output += "-";
+62|      lastWasDash = true;
+63|    }
+64|  }
+65|
+66|  while (output.startsWith("-")) output = output.slice(1);
+67|  while (output.endsWith("-")) output = output.slice(0, -1);
+68|  while (output.includes("//")) output = output.split("//").join("/");
+69|  return output || "untitled";
+70|}
+71|
+72|export const BlogCollection: Collection = {
+73|  name: "blog",
+74|  label: "Blogs",
+75|  path: "src/content/blog",
+76|  format: "mdx",
+77|  ui: {
+78|    filename: {
+79|      readonly: false,
+80|      parse: (filename) => slugifyFilename(filename),
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827134532\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 21:07:52
+Length: 3499
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|import { viewFrontendField } from '../fields/view-frontend';
+5|
+6|function slugifyFilename(value?: string | null): string {
+7|  if (!value || typeof value !== "string") return "untitled";
+8|  let input = value.trim().toLowerCase();
+9|  if (!input) return "untitled";
+10|
+11|  if (input.startsWith("http://") || input.startsWith("https://")) {
+12|    const parts = input.split("/");
+13|    input = parts.slice(3).join("/");
+14|  }
+15|
+16|  input = input.split("?")[0].split("#")[0];
+17|  input = input.split("\\").join("/");
+18|  while (input.startsWith("/")) input = input.slice(1);
+19|  while (input.endsWith("/")) input = input.slice(0, -1);
+20|  if (input.startsWith("blog/")) input = input.slice(5);
+21|
+22|  let output = "";
+23|  let lastWasDash = false;
+24|  for (const ch of input) {
+25|    const isLetter = ch >= "a" && ch <= "z";
+26|    const isNumber = ch >= "0" && ch <= "9";
+27|    const isSlash = ch === "/";
+28|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+29|    if (isAllowed) {
+30|      output += ch;
+31|      lastWasDash = false;
+32|    } else if (!lastWasDash) {
+33|      output += "-";
+34|      lastWasDash = true;
+35|    }
+36|  }
+37|
+38|  while (output.startsWith("-")) output = output.slice(1);
+39|  while (output.endsWith("-")) output = output.slice(0, -1);
+40|  while (output.includes("//")) output = output.split("//").join("/");
+41|  return output || "untitled";
+42|}
+43|
+44|export const BlogCollection: Collection = {
+45|  name: "blog",
+46|  label: "Blogs",
+47|  path: "src/content/blog",
+48|  format: "mdx",
+49|  ui: {
+50|    filename: {
+51|      readonly: false,
+52|      parse: (filename) => slugifyFilename(filename),
+53|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+54|    },
+55|    router: ({ document }) => "/blog/" + document._sys.filename,
+56|  },
+57|  fields: [
+58|    viewFrontendField('blog'),
+59|    {
+60|      type: "string",
+61|      name: "title",
+62|      label: "Title",
+63|      isTitle: true,
+64|      required: true,
+65|    },
+66|    {
+67|      name: "permalink",
+68|      label: "Filename / Permalink",
+69|      type: "string",
+70|      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename.",
+71|    },
+72|    {
+73|      name: "description",
+74|      label: "Description",
+75|      type: "string",
+76|    },
+77|    seoFields,
+78|    {
+79|      name: "pubDate",
+80|      label: "Publication Date",
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260827130752\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 00:33:33
+Length: 3407
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|function slugifyFilename(value?: string | null): string {
+6|  if (!value || typeof value !== "string") return "untitled";
+7|  let input = value.trim().toLowerCase();
+8|  if (!input) return "untitled";
+9|
+10|  if (input.startsWith("http://") || input.startsWith("https://")) {
+11|    const parts = input.split("/");
+12|    input = parts.slice(3).join("/");
+13|  }
+14|
+15|  input = input.split("?")[0].split("#")[0];
+16|  input = input.split("\\").join("/");
+17|  while (input.startsWith("/")) input = input.slice(1);
+18|  while (input.endsWith("/")) input = input.slice(0, -1);
+19|  if (input.startsWith("blog/")) input = input.slice(5);
+20|
+21|  let output = "";
+22|  let lastWasDash = false;
+23|  for (const ch of input) {
+24|    const isLetter = ch >= "a" && ch <= "z";
+25|    const isNumber = ch >= "0" && ch <= "9";
+26|    const isSlash = ch === "/";
+27|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+28|    if (isAllowed) {
+29|      output += ch;
+30|      lastWasDash = false;
+31|    } else if (!lastWasDash) {
+32|      output += "-";
+33|      lastWasDash = true;
+34|    }
+35|  }
+36|
+37|  while (output.startsWith("-")) output = output.slice(1);
+38|  while (output.endsWith("-")) output = output.slice(0, -1);
+39|  while (output.includes("//")) output = output.split("//").join("/");
+40|  return output || "untitled";
+41|}
+42|
+43|export const BlogCollection: Collection = {
+44|  name: "blog",
+45|  label: "Blogs",
+46|  path: "src/content/blog",
+47|  format: "mdx",
+48|  ui: {
+49|    filename: {
+50|      readonly: false,
+51|      parse: (filename) => slugifyFilename(filename),
+52|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+53|    },
+54|    router: ({ document }) => "/blog/" + document._sys.filename,
+55|  },
+56|  fields: [
+57|    {
+58|      type: "string",
+59|      name: "title",
+60|      label: "Title",
+61|      isTitle: true,
+62|      required: true,
+63|    },
+64|    {
+65|      name: "permalink",
+66|      label: "Filename / Permalink",
+67|      type: "string",
+68|      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename.",
+69|    },
+70|    {
+71|      name: "description",
+72|      label: "Description",
+73|      type: "string",
+74|    },
+75|    seoFields,
+76|    {
+77|      name: "pubDate",
+78|      label: "Publication Date",
+79|      type: "datetime",
+80|    },
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826163333\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 00:26:29
+Length: 3143
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|function slugifyFilename(value?: string | null): string {
+6|  if (!value || typeof value !== "string") return "untitled";
+7|  let input = value.trim().toLowerCase();
+8|  if (!input) return "untitled";
+9|
+10|  if (input.startsWith("http://") || input.startsWith("https://")) {
+11|    const parts = input.split("/");
+12|    input = parts.slice(3).join("/");
+13|  }
+14|
+15|  input = input.split("?")[0].split("#")[0];
+16|  input = input.split("\\").join("/");
+17|  while (input.startsWith("/")) input = input.slice(1);
+18|  while (input.endsWith("/")) input = input.slice(0, -1);
+19|  if (input.startsWith("blog/")) input = input.slice(5);
+20|
+21|  let output = "";
+22|  let lastWasDash = false;
+23|  for (const ch of input) {
+24|    const isLetter = ch >= "a" && ch <= "z";
+25|    const isNumber = ch >= "0" && ch <= "9";
+26|    const isSlash = ch === "/";
+27|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+28|    if (isAllowed) {
+29|      output += ch;
+30|      lastWasDash = false;
+31|    } else if (!lastWasDash) {
+32|      output += "-";
+33|      lastWasDash = true;
+34|    }
+35|  }
+36|
+37|  while (output.startsWith("-")) output = output.slice(1);
+38|  while (output.endsWith("-")) output = output.slice(0, -1);
+39|  while (output.includes("//")) output = output.split("//").join("/");
+40|  return output || "untitled";
+41|}
+42|
+43|export const BlogCollection: Collection = {
+44|  name: "blog",
+45|  label: "Blogs",
+46|  path: "src/content/blog",
+47|  format: "mdx",
+48|  ui: {
+49|    filename: {
+50|      readonly: false,
+51|      parse: (filename) => slugifyFilename(filename),
+52|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+53|    },
+54|    router: ({ document }) => "/blog/" + document._sys.filename,
+55|  },
+56|  fields: [
+57|    {
+58|      type: "string",
+59|      name: "title",
+60|      label: "Title",
+61|      isTitle: true,
+62|      required: true,
+63|    },
+64|    {
+65|      name: "description",
+66|      label: "Description",
+67|      type: "string",
+68|    },
+69|    seoFields,
+70|    {
+71|      name: "pubDate",
+72|      label: "Publication Date",
+73|      type: "datetime",
+74|    },
+75|    {
+76|      name: "updatedDate",
+77|      label: "Updated Date",
+78|      type: "datetime",
+79|    },
+80|    {
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826162629\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 00:22:49
+Length: 2975
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|function slugifyFilename(value?: string | null): string {
+6|  if (!value || typeof value !== "string") return "untitled";
+7|  let input = value.trim().toLowerCase();
+8|  if (!input) return "untitled";
+9|  if (input.startsWith("http://") || input.startsWith("https://")) {
+10|    const parts = input.split("/");
+11|    input = parts.slice(3).join("/");
+12|  }
+13|  input = input.split("?")[0].split("#")[0];
+14|  input = input.split("\\").join("/");
+15|  while (input.startsWith("/")) input = input.slice(1);
+16|  while (input.endsWith("/")) input = input.slice(0, -1);
+17|  if (input.startsWith("blog/")) input = input.slice(5);
+18|
+19|  let out = "";
+20|  let dash = false;
+21|  for (const ch of input) {
+22|    const isAlphaNum = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+23|    const isSlash = ch === "/";
+24|    if (isAlphaNum || isSlash) {
+25|      out += ch;
+26|      dash = false;
+27|    } else if (!dash) {
+28|      out += "-";
+29|      dash = true;
+30|    }
+31|  }
+32|  while (out.startsWith("-")) out = out.slice(1);
+33|  while (out.endsWith("-")) out = out.slice(0, -1);
+34|  while (out.includes("//")) out = out.split("//").join("/");
+35|  return out || "untitled";
+36|}
+37|
+38|export const BlogCollection: Collection = {
+39|  name: "blog",
+40|  label: "Blogs",
+41|  path: "src/content/blog",
+42|  format: "mdx",
+43|  ui: {
+44|    filename: {
+45|      readonly: false,
+46|      parse: (filename) => slugifyFilename(filename),
+47|      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+48|    },
+49|    router: ({ document }) => "/blog/" + document._sys.filename,
+50|  },
+51|  fields: [
+52|    {
+53|      type: "string",
+54|      name: "title",
+55|      label: "Title",
+56|      isTitle: true,
+57|      required: true,
+58|    },
+59|    {
+60|      name: "description",
+61|      label: "Description",
+62|      type: "string",
+63|    },
+64|    seoFields,
+65|    {
+66|      name: "pubDate",
+67|      label: "Publication Date",
+68|      type: "datetime",
+69|    },
+70|    {
+71|      name: "updatedDate",
+72|      label: "Updated Date",
+73|      type: "datetime",
+74|    },
+75|    {
+76|      name: "category",
+77|      label: "Category",
+78|      type: "reference",
+79|      collections: ["category"],
+80|      description: "Assign this post to a category, similar to WordPress post categories.",
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826162249\tina\collections\blog.ts ---
+LastWriteTime: 08/27/2026 00:17:48
+Length: 2966
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|function toPublicSlug(value?: string | null): string {
+6|  if (!value || typeof value !== "string") return "";
+7|  let input = value.trim().toLowerCase();
+8|  if (!input) return "";
+9|
+10|  if (input.startsWith("http://") || input.startsWith("https://")) {
+11|    const parts = input.split("/");
+12|    input = parts.slice(3).join("/");
+13|  }
+14|  input = input.split("?")[0].split("#")[0];
+15|  input = input.split("\\").join("/");
+16|  while (input.startsWith("/")) input = input.slice(1);
+17|  while (input.endsWith("/")) input = input.slice(0, -1);
+18|  if (input.startsWith("blog/")) input = input.slice(5);
+19|
+20|  let out = "";
+21|  let dash = false;
+22|  for (const ch of input) {
+23|    const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+24|    if (ok) { out += ch; dash = false; }
+25|    else if (!dash) { out += "-"; dash = true; }
+26|  }
+27|  while (out.startsWith("-")) out = out.slice(1);
+28|  while (out.endsWith("-")) out = out.slice(0, -1);
+29|  return out;
+30|}
+31|
+32|export const BlogCollection: Collection = {
+33|  name: "blog",
+34|  label: "Blogs",
+35|  path: "src/content/blog",
+36|  format: "mdx",
+37|  ui: {
+38|    router: ({ document }) => {
+39|      const slug = toPublicSlug(document?.permalink) || toPublicSlug(document?._sys?.filename);
+40|      return slug ? "/blog/" + slug : "/blog";
+41|    },
+42|  },
+43|  fields: [
+44|    {
+45|      type: "string",
+46|      name: "title",
+47|      label: "Title",
+48|      isTitle: true,
+49|      required: true,
+50|    },
+51|    {
+52|      name: "permalink",
+53|      label: "Permalink / URL",
+54|      type: "string",
+55|      description: "WordPress-style public URL slug. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the file name.",
+56|    },
+57|    {
+58|      name: "description",
+59|      label: "Description",
+60|      type: "string",
+61|    },
+62|    seoFields,
+63|    {
+64|      name: "pubDate",
+65|      label: "Publication Date",
+66|      type: "datetime",
+67|    },
+68|    {
+69|      name: "updatedDate",
+70|      label: "Updated Date",
+71|      type: "datetime",
+72|    },
+73|    {
+74|      name: "category",
+75|      label: "Category",
+76|      type: "reference",
+77|      collections: ["category"],
+78|      description: "Assign this post to a category, similar to WordPress post categories.",
+79|    },
+80|    {
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826161748\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 23:48:19
+Length: 2719
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router: ({ document }) => {
+13|      const raw = document?.permalink || document?._sys?.filename || "";
+14|      let slug = String(raw).trim().toLowerCase();
+15|      slug = slug.replace(new RegExp("^https?://[^/]+", "i"), "");
+16|      slug = slug.split("?")[0].split("#")[0];
+17|      slug = slug.split("\\").join("/");
+18|      while (slug.startsWith("/")) slug = slug.slice(1);
+19|      while (slug.endsWith("/")) slug = slug.slice(0, -1);
+20|      if (slug.startsWith("blog/")) slug = slug.slice(5);
+21|      slug = slug.split("&").join(" and ");
+22|      slug = slug.replace(new RegExp("[^a-z0-9]+", "g"), "-");
+23|      slug = slug.replace(new RegExp("-+", "g"), "-");
+24|      while (slug.startsWith("-")) slug = slug.slice(1);
+25|      while (slug.endsWith("-")) slug = slug.slice(0, -1);
+26|      return slug ? "/blog/" + slug : "/blog/" + document._sys.filename;
+27|    },
+28|  },
+29|  fields: [
+30|    {
+31|      type: "string",
+32|      name: "title",
+33|      label: "Title",
+34|      isTitle: true,
+35|      required: true,
+36|    },
+37|    {
+38|      name: "permalink",
+39|      label: "Permalink / URL",
+40|      type: "string",
+41|      description: "WordPress-style editable URL slug. Use a slug like my-post-url or a path like /blog/my-post-url. Leave blank to use the filename.",
+42|    },
+43|{
+44|      name: "description",
+45|      label: "Description",
+46|      type: "string",
+47|    },
+48|    seoFields,
+49|    {
+50|      name: "pubDate",
+51|      label: "Publication Date",
+52|      type: "datetime",
+53|    },
+54|    {
+55|      name: "updatedDate",
+56|      label: "Updated Date",
+57|      type: "datetime",
+58|    },
+59|    {
+60|      name: "category",
+61|      label: "Category",
+62|      type: "reference",
+63|      collections: ["category"],
+64|      description: "Assign this post to a category, similar to WordPress post categories.",
+65|    },
+66|    {
+67|      name: "author",
+68|      label: "Author / User",
+69|      type: "reference",
+70|      collections: ["user"],
+71|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+72|    },
+73|    {
+74|      name: "heroImage",
+75|      label: "Hero Image",
+76|      type: "image",
+77|    },
+78|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+79|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+80|    {
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826154819\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 23:46:09
+Length: 2372
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router: ({ document }) => {
+13|      const raw = document?.permalink || document?._sys?.filename || "";
+14|      const slug = String(raw)
+15|        .trim()
+16|        .toLowerCase()
+17|        .replace(/^https?://[^/]+/i, "")
+18|        .replace(/[?#].*$/, "")
+19|        .replace(/^/+|/+$/g, "")
+20|        .replace(/^blog//i, "")
+21|        .replace(/&/g, " and ")
+22|        .replace(/[^a-z0-9]+/g, "-")
+23|        .replace(/^-+|-+$/g, "");
+24|      return slug ? "/blog/" + slug : "/blog/" + document._sys.filename;
+25|    },
+26|  },
+27|  fields: [
+28|    {
+29|      type: "string",
+30|      name: "title",
+31|      label: "Title",
+32|      isTitle: true,
+33|      required: true,
+34|    },
+35|    {
+36|      name: "permalink",
+37|      label: "Permalink / URL",
+38|      type: "string",
+39|      description: "WordPress-style editable URL slug. Use a slug like my-post-url or a path like /blog/my-post-url. Leave blank to use the filename.",
+40|    },
+41|{
+42|      name: "description",
+43|      label: "Description",
+44|      type: "string",
+45|    },
+46|    seoFields,
+47|    {
+48|      name: "pubDate",
+49|      label: "Publication Date",
+50|      type: "datetime",
+51|    },
+52|    {
+53|      name: "updatedDate",
+54|      label: "Updated Date",
+55|      type: "datetime",
+56|    },
+57|    {
+58|      name: "category",
+59|      label: "Category",
+60|      type: "reference",
+61|      collections: ["category"],
+62|      description: "Assign this post to a category, similar to WordPress post categories.",
+63|    },
+64|    {
+65|      name: "author",
+66|      label: "Author / User",
+67|      type: "reference",
+68|      collections: ["user"],
+69|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+70|    },
+71|    {
+72|      name: "heroImage",
+73|      label: "Hero Image",
+74|      type: "image",
+75|    },
+76|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+77|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+78|    {
+79|      type: "rich-text",
+80|      name: "body",
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826154609\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 23:37:11
+Length: 2498
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router: ({ document }) => {
+13|      const raw = document?.permalink || document?._sys?.filename || "";
+14|      const permalink = String(raw)
+15|        .trim()
+16|        .toLowerCase()
+17|        .replace(/^https?:\/\/[^/]+/i, "")
+18|        .replace(/[?#].*$/, "")
+19|        .replace(/^\/+|\/+$/g, "")
+20|        .replace(/^blog\//i, "")
+21|        .replace(/&/g, " and ")
+22|        .replace(/[^a-z0-9]+/g, "-")
+23|        .replace(/^-+|-+$/g, "");
+24|      return permalink ? `/blog/${permalink}` : `/blog/${document._sys.filename}`;
+25|    },
+26|  },
+27|  ui: {
+28|},
+29|  ui: {
+30|    router({ document }) {
+31|      return `/blog/${document._sys.filename}`;
+32|    },
+33|  },
+34|  fields: [
+35|    {
+36|      type: "string",
+37|      name: "title",
+38|      label: "Title",
+39|      isTitle: true,
+40|      required: true,
+41|    },
+42|    {
+43|      name: "permalink",
+44|      label: "Permalink / URL",
+45|      type: "string",
+46|      description: "WordPress-style editable URL slug. Use a slug like my-post-url or a path like /blog/my-post-url. Leave blank to use the filename.",
+47|    },
+48|{
+49|      name: "description",
+50|      label: "Description",
+51|      type: "string",
+52|    },
+53|    seoFields,
+54|    {
+55|      name: "pubDate",
+56|      label: "Publication Date",
+57|      type: "datetime",
+58|    },
+59|    {
+60|      name: "updatedDate",
+61|      label: "Updated Date",
+62|      type: "datetime",
+63|    },
+64|    {
+65|      name: "category",
+66|      label: "Category",
+67|      type: "reference",
+68|      collections: ["category"],
+69|      description: "Assign this post to a category, similar to WordPress post categories.",
+70|    },
+71|    {
+72|      name: "author",
+73|      label: "Author / User",
+74|      type: "reference",
+75|      collections: ["user"],
+76|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+77|    },
+78|    {
+79|      name: "heroImage",
+80|      label: "Hero Image",
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826153711\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 23:21:59
+Length: 1969
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|},
+13|  ui: {
+14|    router({ document }) {
+15|      return `/blog/${document._sys.filename}`;
+16|    },
+17|  },
+18|  fields: [
+19|    {
+20|      type: "string",
+21|      name: "title",
+22|      label: "Title",
+23|      isTitle: true,
+24|      required: true,
+25|    },
+26|    {
+27|      name: "permalink",
+28|      label: "Permalink / URL",
+29|      type: "string",
+30|      description: "WordPress-style editable URL slug. Use a slug like my-post-url or a path like /blog/my-post-url. Leave blank to use the filename.",
+31|    },
+32|{
+33|      name: "description",
+34|      label: "Description",
+35|      type: "string",
+36|    },
+37|    seoFields,
+38|    {
+39|      name: "pubDate",
+40|      label: "Publication Date",
+41|      type: "datetime",
+42|    },
+43|    {
+44|      name: "updatedDate",
+45|      label: "Updated Date",
+46|      type: "datetime",
+47|    },
+48|    {
+49|      name: "category",
+50|      label: "Category",
+51|      type: "reference",
+52|      collections: ["category"],
+53|      description: "Assign this post to a category, similar to WordPress post categories.",
+54|    },
+55|    {
+56|      name: "author",
+57|      label: "Author / User",
+58|      type: "reference",
+59|      collections: ["user"],
+60|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+61|    },
+62|    {
+63|      name: "heroImage",
+64|      label: "Hero Image",
+65|      type: "image",
+66|    },
+67|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+68|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+69|    {
+70|      type: "rich-text",
+71|      name: "body",
+72|      label: "Body",
+73|      isBody: true,
+74|      templates: [youTubeEmbedTemplate],
+75|    },
+76|  ],
+77|}
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826152159\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 23:10:47
+Length: 2195
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    filename: {
+13|      parse: (filename) => filename
+14|        .toLowerCase()
+15|        .trim()
+16|        .replace(/\s+/g, "-")
+17|        .replace(/[^a-z0-9/_-]+/g, "")
+18|        .replace(/-+/g, "-")
+19|        .replace(/^\/+|\/+$/g, ""),
+20|      slugify: (values) => String(values?.title || "untitled")
+21|        .toLowerCase()
+22|        .trim()
+23|        .replace(/\s+/g, "-")
+24|        .replace(/[^a-z0-9/_-]+/g, "")
+25|        .replace(/-+/g, "-")
+26|        .replace(/^\/+|\/+$/g, ""),
+27|    },
+28|  },
+29|  ui: {
+30|    router({ document }) {
+31|      return `/blog/${document._sys.filename}`;
+32|    },
+33|  },
+34|  fields: [
+35|    {
+36|      type: "string",
+37|      name: "title",
+38|      label: "Title",
+39|      isTitle: true,
+40|      required: true,
+41|    },
+42|{
+43|      name: "description",
+44|      label: "Description",
+45|      type: "string",
+46|    },
+47|    seoFields,
+48|    {
+49|      name: "pubDate",
+50|      label: "Publication Date",
+51|      type: "datetime",
+52|    },
+53|    {
+54|      name: "updatedDate",
+55|      label: "Updated Date",
+56|      type: "datetime",
+57|    },
+58|    {
+59|      name: "category",
+60|      label: "Category",
+61|      type: "reference",
+62|      collections: ["category"],
+63|      description: "Assign this post to a category, similar to WordPress post categories.",
+64|    },
+65|    {
+66|      name: "author",
+67|      label: "Author / User",
+68|      type: "reference",
+69|      collections: ["user"],
+70|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+71|    },
+72|    {
+73|      name: "heroImage",
+74|      label: "Hero Image",
+75|      type: "image",
+76|    },
+77|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+78|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+79|    {
+80|      type: "rich-text",
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826151047\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 22:47:49
+Length: 1937
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router({ document }) {
+13|      return `/blog/${document._sys.filename}`;
+14|    },
+15|  },
+16|  fields: [
+17|    {
+18|      type: "string",
+19|      name: "title",
+20|      label: "Title",
+21|      isTitle: true,
+22|      required: true,
+23|    },
+24|    {
+25|      name: "permalink",
+26|      label: "Permalink / URL",
+27|      type: "string",
+28|      description: "Optional custom URL path. Examples: /blog/my-custom-post or /about-us. Leave blank to use the file slug.",
+29|    },
+30|    {
+31|      name: "description",
+32|      label: "Description",
+33|      type: "string",
+34|    },
+35|    seoFields,
+36|    {
+37|      name: "pubDate",
+38|      label: "Publication Date",
+39|      type: "datetime",
+40|    },
+41|    {
+42|      name: "updatedDate",
+43|      label: "Updated Date",
+44|      type: "datetime",
+45|    },
+46|    {
+47|      name: "category",
+48|      label: "Category",
+49|      type: "reference",
+50|      collections: ["category"],
+51|      description: "Assign this post to a category, similar to WordPress post categories.",
+52|    },
+53|    {
+54|      name: "author",
+55|      label: "Author / User",
+56|      type: "reference",
+57|      collections: ["user"],
+58|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+59|    },
+60|    {
+61|      name: "heroImage",
+62|      label: "Hero Image",
+63|      type: "image",
+64|    },
+65|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+66|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+67|    {
+68|      type: "rich-text",
+69|      name: "body",
+70|      label: "Body",
+71|      isBody: true,
+72|      templates: [youTubeEmbedTemplate],
+73|    },
+74|  ],
+75|}
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826144749\tina\collections\blog.ts ---
+LastWriteTime: 08/26/2026 21:09:51
+Length: 1718
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router({ document }) {
+13|      return `/blog/${document._sys.filename}`;
+14|    },
+15|  },
+16|  fields: [
+17|    {
+18|      type: "string",
+19|      name: "title",
+20|      label: "Title",
+21|      isTitle: true,
+22|      required: true,
+23|    },
+24|    {
+25|      name: "description",
+26|      label: "Description",
+27|      type: "string",
+28|    },
+29|    seoFields,
+30|    {
+31|      name: "pubDate",
+32|      label: "Publication Date",
+33|      type: "datetime",
+34|    },
+35|    {
+36|      name: "updatedDate",
+37|      label: "Updated Date",
+38|      type: "datetime",
+39|    },
+40|    {
+41|      name: "category",
+42|      label: "Category",
+43|      type: "reference",
+44|      collections: ["category"],
+45|      description: "Assign this post to a category, similar to WordPress post categories.",
+46|    },
+47|    {
+48|      name: "author",
+49|      label: "Author / User",
+50|      type: "reference",
+51|      collections: ["user"],
+52|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+53|    },
+54|    {
+55|      name: "heroImage",
+56|      label: "Hero Image",
+57|      type: "image",
+58|    },
+59|    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+60|    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image image." },
+61|    {
+62|      type: "rich-text",
+63|      name: "body",
+64|      label: "Body",
+65|      isBody: true,
+66|      templates: [youTubeEmbedTemplate],
+67|    },
+68|  ],
+69|}
+
+--- BACKUP: C:\Users\ADMIN\Desktop\Astro\tina-blog\_hermes-backups\20260826130951\tina\collections\blog.ts ---
+LastWriteTime: 08/23/2026 19:55:10
+Length: 1475
+1|import type { Collection } from "tinacms";
+2|import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+3|import { seoFields } from "../fields/seo";
+4|
+5|export const BlogCollection: Collection = {
+6|
+7|  name: "blog",
+8|  label: "Blogs",
+9|  path: "src/content/blog",
+10|  format: "mdx",
+11|  ui: {
+12|    router({ document }) {
+13|      return `/blog/${document._sys.filename}`;
+14|    },
+15|  },
+16|  fields: [
+17|    {
+18|      type: "string",
+19|      name: "title",
+20|      label: "Title",
+21|      isTitle: true,
+22|      required: true,
+23|    },
+24|    {
+25|      name: "description",
+26|      label: "Description",
+27|      type: "string",
+28|    },
+29|    seoFields,
+30|    {
+31|      name: "pubDate",
+32|      label: "Publication Date",
+33|      type: "datetime",
+34|    },
+35|    {
+36|      name: "updatedDate",
+37|      label: "Updated Date",
+38|      type: "datetime",
+39|    },
+40|    {
+41|      name: "category",
+42|      label: "Category",
+43|      type: "reference",
+44|      collections: ["category"],
+45|      description: "Assign this post to a category, similar to WordPress post categories.",
+46|    },
+47|    {
+48|      name: "author",
+49|      label: "Author / User",
+50|      type: "reference",
+51|      collections: ["user"],
+52|      description: "Assign this post to a user profile, similar to a WordPress post author.",
+53|    },
+54|    {
+55|      name: "heroImage",
+56|      label: "Hero Image",
+57|      type: "image",
+58|    },
+59|    {
+60|      type: "rich-text",
+61|      name: "body",
+62|      label: "Body",
+63|      isBody: true,
+64|      templates: [youTubeEmbedTemplate],
+65|    },
+66|  ],
+67|}
+
+==================== BLOG CONTENT FRONTMATTER SAMPLE ====================
+
+--- POST: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\content\blog\helllooooo222.mdx ---
+listTitle: "[Politics] Nam vehicula risus vel ex sagittis ullamcorper"
+title: Nam vehicula risus vel ex sagittis ullamcorper
+permalink: helllooooo222
+description: hello world
+category: src/content/category/Politics.json
+author: ''
+heroImage: /placeholder-2.jpg
+authorAlt: Placeholder
+heroImageAlt: Placeholder
+
+--- POST: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\content\blog\hello-world-33334444.mdx ---
+listTitle: "[Economy] Cras fermentum sem id purus fringilla laoreet"
+title: Cras fermentum sem id purus fringilla laoreet
+permalink: hello world 33334444
+description: qewfasgfasfs
+category: src/content/category/Economy.json
+author: src/content/user/admin.json
+heroImage: /Regenicel-Aesthetics-Regenerative-Science.jpg
+authorAlt: Placeholder
+heroImageAlt: Placeholder
+
+--- POST: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\content\blog\lorem-ipsum-dolor-sit-amet.mdx ---
+listTitle: "[National News] Lorem ipsum dolor sit amet"
+title: Lorem ipsum dolor sit amet
+permalink: Lorem ipsum dolor sit amet
+description: hello world
+category: src/content/category/news.json
+author: ''
+heroImage: /placeholder-1.jpg
+authorAlt: Placeholder
+heroImageAlt: Placeholder
+
+--- POST: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\content\blog\sed-id.mdx ---
+listTitle: "[Technology] Sed id mauris in lacus aliquam loborti"
+title: Sed id mauris in lacus aliquam loborti
+permalink: sed-id
+description: hello world 5
+category: src/content/category/Technology.json
+author: ''
+heroImage: /placeholder-5.jpg
+
+--- POST: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\content\blog\test-100.mdx ---
+listTitle: "[National News] Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+permalink: test-100
+description: hello world
+category: src/content/category/news.json
+author: src/content/user/admin.json
+heroImage: /placeholder-1.jpg
+authorAlt: Placeholder
+heroImageAlt: Placeholder

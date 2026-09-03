@@ -1,0 +1,24 @@
+---
+import Blocks from '../blocks/Blocks.astro';
+import type { CmsPage } from '../../lib/data';
+
+interface Props {
+	data?: CmsPage | null;
+}
+
+const { data } = Astro.props;
+const filename = data?._sys?.filename ?? '';
+const showPageTitle = Boolean(data?.title && filename !== 'home');
+---
+{data && (
+	<>
+		{showPageTitle && (
+			<header class="page-title-header">
+				<div class="site-wrap">
+					<h1>{data.title}</h1>
+				</div>
+			</header>
+		)}
+		<Blocks data={data} />
+	</>
+)}

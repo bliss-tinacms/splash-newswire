@@ -1,0 +1,71 @@
+{
+  "title": "Header Navigation",
+  "items": [
+    {
+      "label": "About",
+      "href": "/about"
+    },
+    {
+      "label": "Trending",
+      "href": "#",
+      "children": [
+        {
+          "label": "National News",
+          "href": "/blog/category/news/"
+        },
+        {
+          "label": "Politics",
+          "href": "/blog/category/politics/"
+        },
+        {
+          "label": "Business",
+          "href": "/blog/category/business/"
+        },
+        {
+          "label": "Economy",
+          "href": "/blog/category/economy/"
+        },
+        {
+          "label": "Technology",
+          "href": "/blog/category/technology/"
+        },
+        {
+          "label": "Health",
+          "href": "/blog/category/health/"
+        },
+        {
+          "label": "Science",
+          "href": "/blog/category/science/"
+        },
+        {
+          "label": "Lifestyle",
+          "href": "/blog/category/lifestyle/"
+        },
+        {
+          "label": "Culture",
+          "href": "/blog/category/culture/"
+        },
+        {
+          "label": "Featured",
+          "href": "/blog/category/featured/"
+        }
+      ]
+    },
+    {
+      "label": "Our Team",
+      "href": "/our-team"
+    },
+    {
+      "label": "Editorial Guidelines",
+      "href": "/about"
+    },
+    {
+      "label": "Blog",
+      "href": "/blog"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact"
+    }
+  ]
+}

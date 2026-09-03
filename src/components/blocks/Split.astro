@@ -12,16 +12,15 @@ interface Props { data: SplitBlock }
 
 const { data } = Astro.props;
 const actions = (data.actions ?? []).filter(a => a !== null);
+const body = data?.body && typeof data.body === 'object' ? data.body : null;
 ---
 <Section>
 	<div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-16">
 		<div class={cn('space-y-6', data.reverse && 'md:order-2')}>
 			{data.title && <h2 data-tina-field={tinaField(data, 'title')} class="text-balance text-3xl font-semibold lg:text-4xl">{data.title}</h2>}
-			{data.body && (
-				<div data-tina-field={tinaField(data, 'body')} class="prose prose-lg max-w-none text-muted-foreground">
-					<TinaMarkdown content={data.body} components={mdxComponents} />
-				</div>
-			)}
+			<div data-tina-field={tinaField(data, 'body')} class="prose prose-lg max-w-none text-muted-foreground">
+				{body ? <TinaMarkdown content={body} components={mdxComponents} /> : <p>Add body text in the sidebar.</p>}
+			</div>
 			{actions.length > 0 && (
 				<div class="flex flex-wrap gap-3 pt-2">
 					{actions.map((action) => (

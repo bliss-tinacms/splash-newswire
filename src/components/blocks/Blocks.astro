@@ -1,6 +1,8 @@
 ---
 import { tinaField } from '@tinacms/astro/tina-field';
 import Callout from './Callout.astro';
+import OurTeamMockup17Block from './OurTeamMockup17Block.astro';
+import ContactMockup17Block from './ContactMockup17Block.astro';
 import Content from './Content.astro';
 import Cta from './Cta.astro';
 import Features from './Features.astro';
@@ -23,6 +25,8 @@ const blocks = (data?.blocks ?? []).filter(b => b !== null);
 	const rendered = (() => {
 		switch (block.__typename) {
 			case 'PageBlocksCallout': return <Callout data={block} />;
+			case 'PageBlocksOurTeamMockup17': return <OurTeamMockup17Block data={block} />;
+			case 'PageBlocksContactMockup17': return <ContactMockup17Block data={block} />;
 			case 'PageBlocksContent': return <Content data={block} />;
 			case 'PageBlocksCta': return <Cta data={block} />;
 			case 'PageBlocksFeatures': return <Features data={block} />;

@@ -1,0 +1,584 @@
+Tina filename/permalink debug
+Generated: 08/27/2026 00:44:04
+Project root: C:\Users\ADMIN\Desktop\Astro\tina-blog
+
+
+==================== tina\collections\blog.ts ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\tina\collections\blog.ts
+
+import type { Collection } from "tinacms";
+import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
+import { seoFields } from "../fields/seo";
+
+function slugifyFilename(value?: string | null): string {
+  if (!value || typeof value !== "string") return "untitled";
+  let input = value.trim().toLowerCase();
+  if (!input) return "untitled";
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  if (input.startsWith("blog/")) input = input.slice(5);
+
+  let output = "";
+  let lastWasDash = false;
+  for (const ch of input) {
+    const isLetter = ch >= "a" && ch <= "z";
+    const isNumber = ch >= "0" && ch <= "9";
+    const isSlash = ch === "/";
+    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+    if (isAllowed) {
+      output += ch;
+      lastWasDash = false;
+    } else if (!lastWasDash) {
+      output += "-";
+      lastWasDash = true;
+    }
+  }
+
+  while (output.startsWith("-")) output = output.slice(1);
+  while (output.endsWith("-")) output = output.slice(0, -1);
+  while (output.includes("//")) output = output.split("//").join("/");
+  return output || "untitled";
+}
+
+export const BlogCollection: Collection = {
+  name: "blog",
+  label: "Blogs",
+  path: "src/content/blog",
+  format: "mdx",
+  ui: {
+    filename: {
+      readonly: false,
+      parse: (filename) => slugifyFilename(filename),
+      slugify: (values) => slugifyFilename(values?.title || "untitled"),
+    },
+    router: ({ document }) => "/blog/" + document._sys.filename,
+  },
+  fields: [
+    {
+      type: "string",
+      name: "title",
+      label: "Title",
+      isTitle: true,
+      required: true,
+    },
+    {
+      name: "permalink",
+      label: "Filename / Permalink",
+      type: "string",
+      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename.",
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "string",
+    },
+    seoFields,
+    {
+      name: "pubDate",
+      label: "Publication Date",
+      type: "datetime",
+    },
+    {
+      name: "updatedDate",
+      label: "Updated Date",
+      type: "datetime",
+    },
+    {
+      name: "category",
+      label: "Category",
+      type: "reference",
+      collections: ["category"],
+      description: "Assign this post to a category, similar to WordPress post categories.",
+    },
+    {
+      name: "author",
+      label: "Author / User",
+      type: "reference",
+      collections: ["user"],
+      description: "Assign this post to a user profile, similar to a WordPress post author.",
+    },
+    {
+      name: "heroImage",
+      label: "Hero Image",
+      type: "image",
+    },
+    { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
+    { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image." },
+    {
+      type: "rich-text",
+      name: "body",
+      label: "Body",
+      isBody: true,
+      templates: [youTubeEmbedTemplate],
+    },
+  ],
+};
+
+
+
+==================== tina\collections\page.ts ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\tina\collections\page.ts
+
+import type { Collection } from 'tinacms';
+import { heroBlockSchema } from '../../src/components/blocks/hero.template';
+import { featuresBlockSchema } from '../../src/components/blocks/features.template';
+import { statsBlockSchema } from '../../src/components/blocks/stats.template';
+import { ctaBlockSchema } from '../../src/components/blocks/cta.template';
+import { testimonialBlockSchema } from '../../src/components/blocks/testimonial.template';
+import { calloutBlockSchema } from '../../src/components/blocks/callout.template';
+import { contentBlockSchema } from '../../src/components/blocks/content.template';
+import { videoBlockSchema } from '../../src/components/blocks/video.template';
+import { splitBlockSchema } from '../../src/components/blocks/split.template';
+import { seoFields } from '../fields/seo';
+
+function slugifyFilename(value?: string | null): string {
+  if (!value || typeof value !== "string") return "untitled";
+  let input = value.trim().toLowerCase();
+  if (!input) return "untitled";
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  if (input.startsWith("blog/")) input = input.slice(5);
+
+  let output = "";
+  let lastWasDash = false;
+  for (const ch of input) {
+    const isLetter = ch >= "a" && ch <= "z";
+    const isNumber = ch >= "0" && ch <= "9";
+    const isSlash = ch === "/";
+    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+    if (isAllowed) {
+      output += ch;
+      lastWasDash = false;
+    } else if (!lastWasDash) {
+      output += "-";
+      lastWasDash = true;
+    }
+  }
+
+  while (output.startsWith("-")) output = output.slice(1);
+  while (output.endsWith("-")) output = output.slice(0, -1);
+  while (output.includes("//")) output = output.split("//").join("/");
+  return output || "untitled";
+}
+
+function toPublicSlug(value?: string | null): string {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input) return "";
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  if (input.startsWith("blog/")) input = input.slice(5);
+
+  let out = "";
+  let dash = false;
+  for (const ch of input) {
+    const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+    if (ok) { out += ch; dash = false; }
+    else if (!dash) { out += "-"; dash = true; }
+  }
+  while (out.startsWith("-")) out = out.slice(1);
+  while (out.endsWith("-")) out = out.slice(0, -1);
+  return out;
+}
+
+export const PageCollection: Collection = {
+  name: 'page',
+  label: 'Pages',
+  path: 'src/content/page',
+  format: 'mdx',
+  ui: {
+    filename: {
+      readonly: false,
+      parse: (filename) => slugifyFilename(filename),
+      slugify: (values) => slugifyFilename(values?.seoTitle || values?.title || 'untitled'),
+    },
+    router: ({ document }) => "/" + document._sys.filename,
+  },
+  fields: [
+    {
+      name: 'seoTitle',
+      label: 'Meta Title (SEO)',
+      type: 'string',
+      isTitle: true,
+      required: true,
+      description:
+        "Shown in the browser tab and search results â€” not on the page itself. To change the heading visitors see at the top of the page, edit the Headline of the page's Hero block (if it has one) in Page Sections below.",
+    },
+    {
+      name: "permalink",
+      label: "Filename / Permalink",
+      type: "string",
+      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename.",
+    },
+    seoFields,
+    {
+      type: 'object',
+      list: true,
+      name: 'blocks',
+      label: 'Page Sections',
+      description:
+        "The visible content of the page. When the page starts with a Hero block, its Headline is the main on-page heading â€” edit that to change what visitors see at the top.",
+      ui: { visualSelector: true },
+      templates: [
+        heroBlockSchema,
+        calloutBlockSchema,
+        featuresBlockSchema,
+        statsBlockSchema,
+        ctaBlockSchema,
+        contentBlockSchema,
+        testimonialBlockSchema,
+        videoBlockSchema,
+        splitBlockSchema,
+      ],
+    },
+  ],
+};
+
+
+
+==================== src\lib\data.ts ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\lib\data.ts
+
+/**
+ * Per-collection data loaders + the data shapes they return.
+ *
+ * Loaders call the generated Tina client and pipe the result through
+ * `requestWithMetadata()` so the editor overlay flows in when the page
+ * renders inside the admin iframe and `tinaField()` has its metadata.
+ *
+ * Types below are pure derivations — no hand-written shapes. Each one is
+ * either inferred from a loader's return type (`CmsConfig`/`CmsPage`/
+ * `CmsBlog`) or `Extract`/index-accessed off those. The Tina collection
+ * is the source of truth; regen with `tinacms dev` and everything
+ * downstream updates.
+ */
+import type { TinaRichTextContent } from '@tinacms/astro';
+import { requestWithMetadata } from '@tinacms/astro/data';
+import client from '../../tina/__generated__/client';
+
+export const getConfig = () =>
+	requestWithMetadata(client.queries.config({ relativePath: 'config.json' }));
+
+export const getHeaderNavigation = () =>
+	requestWithMetadata(client.queries.navigation({ relativePath: 'header.json' }));
+
+export const getPage = (slug: string) =>
+	requestWithMetadata(client.queries.page({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
+
+export const getBlog = (slug: string) =>
+	requestWithMetadata(client.queries.blog({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
+
+export const getUser = (slug: string) =>
+	requestWithMetadata(client.queries.user({ relativePath: `${slug}.json` }));
+
+export async function listPages() {
+	const result = await client.queries.pageConnection();
+	return (result.data.pageConnection.edges ?? [])
+		.flatMap((edge) => (edge?.node ? [edge.node] : []));
+}
+
+export async function listBlogs() {
+	const result = await client.queries.blogConnection();
+	return (result.data.blogConnection.edges ?? [])
+		.flatMap((edge) => (edge?.node ? [edge.node] : []))
+		.sort((a, b) => {
+			const ad = a.pubDate ? new Date(a.pubDate).valueOf() : 0;
+			const bd = b.pubDate ? new Date(b.pubDate).valueOf() : 0;
+			return bd - ad;
+		});
+}
+
+export type CmsConfig = Awaited<ReturnType<typeof getConfig>>['data']['config'];
+export type CmsPage = Awaited<ReturnType<typeof getPage>>['data']['page'];
+export type CmsBlog = Awaited<ReturnType<typeof getBlog>>['data']['blog'];
+export type CmsUser = Awaited<ReturnType<typeof getUser>>['data']['user'];
+
+export type PageBlock = NonNullable<NonNullable<CmsPage['blocks']>[number]>;
+export type PageBlockTypename = PageBlock['__typename'];
+
+export type HeroBlock = Extract<PageBlock, { __typename: 'PageBlocksHero' }>;
+export type CalloutBlock = Extract<PageBlock, { __typename: 'PageBlocksCallout' }>;
+export type FeaturesBlock = Extract<PageBlock, { __typename: 'PageBlocksFeatures' }>;
+export type StatsBlock = Extract<PageBlock, { __typename: 'PageBlocksStats' }>;
+export type CtaBlock = Extract<PageBlock, { __typename: 'PageBlocksCta' }>;
+export type ContentBlock = Extract<PageBlock, { __typename: 'PageBlocksContent' }>;
+export type TestimonialBlock = Extract<PageBlock, { __typename: 'PageBlocksTestimonial' }>;
+export type VideoBlock = Extract<PageBlock, { __typename: 'PageBlocksVideo' }>;
+export type SplitBlock = Extract<PageBlock, { __typename: 'PageBlocksSplit' }>;
+
+export type CmsConfigNav = NonNullable<NonNullable<CmsConfig['nav']>[number]>;
+export type CmsConfigFooterNav = NonNullable<NonNullable<CmsConfig['footerNav']>[number]>;
+export type CmsConfigContactLink = NonNullable<NonNullable<CmsConfig['contactLinks']>[number]>;
+export type CmsConfigSeo = NonNullable<CmsConfig['seo']>;
+
+export type Action = NonNullable<NonNullable<HeroBlock['actions']>[number]>;
+export type ImageField = NonNullable<HeroBlock['image']>;
+export type FeatureItem = NonNullable<NonNullable<FeaturesBlock['items']>[number]>;
+export type StatItem = NonNullable<NonNullable<StatsBlock['stats']>[number]>;
+export type TestimonialItem = NonNullable<NonNullable<TestimonialBlock['testimonials']>[number]>;
+
+/** Tina rich-text bodies are typed as `any` in the generated client; this is what `<TinaMarkdown>` expects. */
+export type RichText = TinaRichTextContent;
+export const getFooterNavigation = () =>
+  requestWithMetadata(client.queries.navigation({ relativePath: 'footer.json' }));
+
+
+
+==================== src\lib\permalinks.ts ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\lib\permalinks.ts
+
+function cleanSlug(value?: string | null): string {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input) return "";
+  if (input.startsWith("http://") || input.startsWith("https://")) input = input.split("/").slice(3).join("/");
+  input = input.split("?")[0].split("#")[0].split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  if (input.startsWith("blog/")) input = input.slice(5);
+  let out = "";
+  let dash = false;
+  for (const ch of input) {
+    const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+    if (ok) { out += ch; dash = false; }
+    else if (!dash) { out += "-"; dash = true; }
+  }
+  while (out.startsWith("-")) out = out.slice(1);
+  while (out.endsWith("-")) out = out.slice(0, -1);
+  return out;
+}
+function fileSlug(item: any): string { return cleanSlug(item?._sys?.filename || item?._sys?.basename || item?.slug || ""); }
+export function getBlogRouteSlug(item: any): string { return cleanSlug(item?.permalink) || fileSlug(item); }
+export function getBlogPermalink(item: any): string { const slug = getBlogRouteSlug(item); return slug ? "/blog/" + slug : "/blog"; }
+export function getPageRouteSlug(item: any): string { return cleanSlug(item?.permalink) || fileSlug(item); }
+export function getPagePermalink(item: any): string { const slug = getPageRouteSlug(item); return slug ? "/" + slug : "/"; }
+
+
+
+==================== src\pages\blog\[...slug].astro ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\pages\blog\[...slug].astro
+
+---
+import { getBlogRouteSlug } from '../../lib/permalinks';
+import BlogPost from '../../layouts/BlogPost.astro';
+import TinaIsland from '@tinacms/astro/TinaIsland.astro';
+import BlogBody from '../../components/islands/BlogBody.astro';
+import { getBlog, getUser, listBlogs } from '../../lib/data';
+import { islands } from '../../lib/islands';
+
+export async function getStaticPaths() {
+  const posts = await listBlogs();
+  return posts.map((node) => ({
+    params: { slug: getBlogRouteSlug(node) },
+    props: { documentSlug: node._sys.filename },
+  }));
+}
+
+const routeSlug = (Astro.params.slug ?? '').toString();
+const allPosts = await listBlogs();
+const matchedPost = allPosts.find((post) => getBlogRouteSlug(post) === routeSlug || post._sys.filename === routeSlug);
+const documentSlug = Astro.props.documentSlug ?? matchedPost?._sys.filename ?? routeSlug;
+const blog = await getBlog(documentSlug);
+const data = blog.data?.blog;
+if (!data) return new Response('Not Found', { status: 404 });
+const defaultAuthor = (await getUser('admin')).data?.user ?? null;
+
+
+
+function getReferenceKey(reference: unknown) {
+  if (!reference) return null;
+  if (typeof reference === 'string') return reference;
+  if (typeof reference === 'object') {
+    const item = reference as { _sys?: { filename?: string | null } | null; title?: string | null; name?: string | null };
+    return item._sys?.filename || item.title || item.name || null;
+  }
+  return null;
+}
+
+const currentCategoryKey = getReferenceKey(data.category);
+const relatedPosts = allPosts
+  .filter((post) => post._sys.filename !== documentSlug)
+  .filter((post) => currentCategoryKey && getReferenceKey(post.category) === currentCategoryKey)
+  .slice(0, 3);
+
+const seo = data.seo ?? null;
+const title = seo?.metaTitle || data.title || '';
+const description = seo?.metaDescription || data.description || '';
+
+const layoutProps = {
+  title,
+  description,
+  pubDate: data.pubDate ? new Date(data.pubDate) : new Date(),
+  updatedDate: data.updatedDate ? new Date(data.updatedDate) : undefined,
+  heroImage: seo?.ogImage || data.heroImage || null,
+  ogTitle: seo?.ogTitle || title,
+  ogDescription: seo?.ogDescription || description,
+  canonicalUrl: seo?.canonicalUrl || undefined,
+  noindex: seo?.noindex || false,
+  nofollow: seo?.nofollow || false,
+};
+---
+
+<BlogPost {...layoutProps}>
+  <TinaIsland name="blog" wrapper={islands.blog.wrapper} params={{ slug: documentSlug }} primary>
+    <BlogBody data={data} relatedPosts={relatedPosts} defaultAuthor={defaultAuthor} />
+  </TinaIsland>
+</BlogPost>
+
+
+
+==================== src\pages\[...slug].astro ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\pages\[...slug].astro
+
+---
+import { getPageRouteSlug } from '../lib/permalinks';
+import Base from '../layouts/Base.astro';
+import TinaIsland from '@tinacms/astro/TinaIsland.astro';
+import PageBody from '../components/islands/PageBody.astro';
+import { getConfig, getPage, listPages } from '../lib/data';
+import { islands } from '../lib/islands';
+
+export async function getStaticPaths() {
+  const pages = await listPages();
+  return pages
+    .filter((node) => node._sys.filename !== 'home')
+    .map((node) => ({
+      params: { slug: getPageRouteSlug(node) },
+      props: { documentSlug: node._sys.filename },
+    }));
+}
+
+const routeSlug = (Astro.params.slug ?? '').toString();
+const allPages = await listPages();
+const matchedPage = allPages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
+const documentSlug = Astro.props.documentSlug ?? matchedPage?._sys.filename ?? routeSlug;
+const page = await getPage(documentSlug);
+const data = page.data?.page;
+if (!data) return new Response('Not Found', { status: 404 });
+const config = (await getConfig()).data?.config ?? null;
+const seo = data.seo ?? null;
+const title = seo?.metaTitle || data.seoTitle || config?.seo?.title || 'TinaCMS + Astro';
+const description = seo?.metaDescription || config?.seo?.description || 'Welcome to my website!';
+---
+
+<Base
+  title={title}
+  description={description}
+  image={seo?.ogImage || undefined}
+  ogTitle={seo?.ogTitle || title}
+  ogDescription={seo?.metaDescription || description}
+  canonicalUrl={seo?.canonicalUrl || undefined}
+  noindex={seo?.noindex || false}
+  nofollow={seo?.nofollow || false}
+>
+  <TinaIsland name="page" wrapper={islands.page.wrapper} params={{ slug: documentSlug }} primary>
+    <PageBody data={data} />
+  </TinaIsland>
+</Base>
+
+
+
+==================== src\pages\blog\index.astro ====================
+
+PATH: C:\Users\ADMIN\Desktop\Astro\tina-blog\src\pages\blog\index.astro
+
+---
+import { getBlogPermalink } from '../../lib/permalinks';
+import Base from '../../layouts/Base.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { getConfig, listBlogs } from '../../lib/data';
+
+const posts = await listBlogs();
+const config = (await getConfig()).data?.config ?? null;
+const title = `Blog | ${config?.seo?.title ?? 'TinaCMS + Astro'}`;
+const description = config?.seo?.description ?? 'Latest blog posts.';
+
+function getReferenceLabel(reference: unknown) {
+	if (!reference) return null;
+	if (typeof reference === 'string') {
+		return reference.split('/').pop()?.replace(/\.(json|mdx?)$/, '').replace(/-/g, ' ') ?? null;
+	}
+	if (typeof reference === 'object') {
+		const item = reference as { title?: string; name?: string };
+		return String(item.title ?? item.name ?? '') || null;
+	}
+	return null;
+}
+---
+
+<Base
+	title={title}
+	description={description}
+>
+	<main class="mx-auto max-w-5xl px-6 py-12">
+		<h1 class="mb-8 text-4xl font-semibold tracking-tight">Blog</h1>
+		<ul class="grid list-none gap-6 p-0 sm:grid-cols-2">
+			{posts.map((post) => (
+				<li>
+					<a href={getBlogPermalink(post) + '/'} class="group block overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md">
+						{post.heroImage && (
+							<img width={720} height={360} src={post.heroImage} alt={post.title ?? ''} class="aspect-video w-full object-cover" />
+						)}
+						<div class="p-6">
+							{getReferenceLabel(post.category) && (
+								<p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+									{getReferenceLabel(post.category)}
+								</p>
+							)}
+							<h2 class="font-semibold group-hover:underline">{post.title}</h2>
+							{post.pubDate && (
+								<p class="mt-1 text-sm text-muted-foreground">
+									{getReferenceLabel(post.author) && <span>By {getReferenceLabel(post.author)} · </span>}
+									<FormattedDate date={new Date(post.pubDate)} />
+								</p>
+							)}
+						</div>
+					</a>
+				</li>
+			))}
+		</ul>
+	</main>
+</Base>
+
+
+
+==================== CONTENT FILENAMES ====================
+
+cras-fermentum-sem-id-purus-fringilla-laoreet.mdx
+Lorem-ipsum-dolor-sit-amet-consectetur-adipiscing-elit.mdx
+test-1.mdx
+test-2.mdx
+test-3.mdx
+test-4.mdx
+test-5.mdx
+about.mdx
+home.mdx

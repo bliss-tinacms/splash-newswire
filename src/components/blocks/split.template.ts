@@ -29,7 +29,6 @@ export const splitBlockSchema: Template = {
 	ui: {
 		defaultItem: {
 			title: 'A headline that sits beside your image',
-			body: 'Describe the feature or story here, with a supporting image right alongside it.',
 		},
 	},
 };

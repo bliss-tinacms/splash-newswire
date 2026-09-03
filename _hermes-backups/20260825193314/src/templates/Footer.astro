@@ -1,0 +1,32 @@
+---
+import footerNavigation from '../content/navigation/footer.json';
+
+const footerMenuItems = (footerNavigation.items || []).filter((item) => item && item.label && item.href);
+---
+
+<footer class="foot">
+  <div class="w">
+    <div class="foot-hero">
+      <div class="fh-l">
+        <p class="fh-p">Share news that matters. From company announcements and community developments to events and noteworthy updates, your story can start here.</p>
+      </div>
+      <div class="fh-r">
+        <div class="fh-eye">Have news to share?</div>
+        <p class="fh-h">Put Your Story on Our Radar</p>
+        <p class="fh-x">Send your announcement, story tip, or noteworthy update to the Splash Newswire editorial team for review and editorial consideration.</p>
+        <a href="/#contact" class="fh-cta">Submit your news â†’</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="w">
+    <div class="foot-btm">
+      <p>Â© 2026 Splash Newswire. Your news, everywhere it matters.</p>
+      <nav class="foot-legal" aria-label={footerNavigation.title || 'Footer menu'}>
+        {footerMenuItems.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+    </div>
+  </div>
+</footer>

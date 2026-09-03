@@ -8,12 +8,26 @@ interface Props {
 	pubDate: Date;
 	updatedDate?: Date;
 	heroImage?: string | null;
+	ogTitle?: string;
+	ogDescription?: string;
+	canonicalUrl?: string;
+	noindex?: boolean;
+	nofollow?: boolean;
 }
 
-const { title, description, heroImage } = Astro.props;
+const { title, description, heroImage, ogTitle, ogDescription, canonicalUrl, noindex, nofollow } = Astro.props;
 ---
 
-<Base title={title} description={description} image={heroImage ?? undefined}>
+<Base
+	title={title}
+	description={description}
+	image={heroImage ?? undefined}
+	ogTitle={ogTitle}
+	ogDescription={ogDescription}
+	canonicalUrl={canonicalUrl}
+	noindex={noindex}
+	nofollow={nofollow}
+>
 	<div class="mx-auto max-w-4xl px-6 pt-8">
 		<a
 			href="/blog"

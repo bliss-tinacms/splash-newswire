@@ -1,0 +1,460 @@
+﻿Splash Newswire About editable render debug
+Generated: 2026-08-28 00:25:01
+Project root: C:\Users\ADMIN\Desktop\Astro\tina-blog
+
+
+==================== src\components\islands\PageBody.astro ====================
+1|---
+2|import Blocks from '../blocks/Blocks.astro';
+3|import AboutMockup17Block from '../blocks/AboutMockup17Block.astro';
+4|
+5|const { data } = Astro.props;
+6|const pageBlocks = Array.isArray(data?.blocks) ? data.blocks : [];
+7|const aboutMockup17Block = pageBlocks.find((block) => block?._template === 'aboutMockup17');
+8|const regularBlocks = pageBlocks.filter((block) => block?._template !== 'aboutMockup17');
+9|const showPageTitle = Boolean(data?.title && data?._sys?.filename !== 'home' && !aboutMockup17Block);
+10|---
+11|
+12|{data && (
+13|  <>
+14|    {showPageTitle && <h1 class="single-page-title">{data.title}</h1>}
+15|    {aboutMockup17Block && <AboutMockup17Block data={aboutMockup17Block} />}
+16|    {regularBlocks.length > 0 && <Blocks data={{ ...data, blocks: regularBlocks }} />}
+17|  </>
+18|)}
+
+==================== src\components\blocks\Blocks.astro ====================
+1|---
+2|import { tinaField } from '@tinacms/astro/tina-field';
+3|import Callout from './Callout.astro';
+4|import Content from './Content.astro';
+5|import Cta from './Cta.astro';
+6|import Features from './Features.astro';
+7|import Hero from './Hero.astro';
+8|import Split from './Split.astro';
+9|import Stats from './Stats.astro';
+10|import Testimonial from './Testimonial.astro';
+11|import Video from './Video.astro';
+12|import ConstellationDivider from '../space/ConstellationDivider.astro';
+13|import type { CmsPage } from '../../lib/data';
+14|
+15|interface Props {
+16|	data?: CmsPage | null;
+17|}
+18|
+19|const { data } = Astro.props;
+20|const blocks = (data?.blocks ?? []).filter(b => b !== null);
+21|---
+22|{blocks.map((block, i) => {
+23|	const rendered = (() => {
+24|		switch (block.__typename) {
+25|			case 'PageBlocksCallout': return <Callout data={block} />;
+26|			case 'PageBlocksContent': return <Content data={block} />;
+27|			case 'PageBlocksCta': return <Cta data={block} />;
+28|			case 'PageBlocksFeatures': return <Features data={block} />;
+29|			case 'PageBlocksHero': return <Hero data={block} />;
+30|			case 'PageBlocksSplit': return <Split data={block} />;
+31|			case 'PageBlocksStats': return <Stats data={block} />;
+32|			case 'PageBlocksTestimonial': return <Testimonial data={block} />;
+33|			case 'PageBlocksVideo': return <Video data={block} />;
+34|		}
+35|	})();
+36|	return (
+37|		<>
+38|			<div data-tina-field={tinaField(block)}>{rendered}</div>
+39|			{i < blocks.length - 1 && <ConstellationDivider class="my-2 opacity-70" />}
+40|		</>
+41|	);
+42|})}
+
+==================== src\components\blocks\AboutMockup17Block.astro ====================
+1|---
+2|const { data = {} } = Astro.props;
+3|const coverageItems = Array.isArray(data.coverageItems) ? data.coverageItems : [];
+4|const standards = Array.isArray(data.standards) ? data.standards : [];
+5|const contacts = Array.isArray(data.contacts) ? data.contacts : [];
+6|const icon = (name = '') => {
+7|  if (name === 'alert') return '<svg class="about-nc-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
+8|  if (name === 'document') return '<svg class="about-nc-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>';
+9|  return '<svg class="about-nc-svg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+10|};
+11|---
+12|<section class="about-template">
+13|  <header class="about-ph"><div class="about-w"><div class="about-ph-kick"><i></i><span>{data.eyebrow}</span></div><h1>{data.headline}</h1><p class="about-ph-lede">{data.lede}</p></div></header>
+14|  <nav class="about-jump" aria-label="About page sections"><div class="about-w"><div class="about-jump-in"><a href="#purpose">Our Purpose</a><a href="#coverage">Coverage</a><a href="#standards">What We Stand For</a><a href="#independence">Independence</a><a href="#newsroom">Reach the Newsroom</a></div></div></nav>
+15|  <section id="purpose" class="about-pur"><div class="about-w"><div class="about-pur-in"><div class="about-pur-l"><div class="about-eye">{data.purposeEyebrow}</div><h2 class="about-h2">{data.purposeTitle}</h2></div><div class="about-pur-r"><p>{data.purposeParagraphOne}</p><p class="about-pur-pull">{data.purposePullquote}</p><p>{data.purposeParagraphTwo}</p></div></div></div></section>
+16|  <section id="coverage" class="about-cov"><div class="about-w"><div class="about-cov-h"><div class="about-eye">{data.coverageEyebrow}</div><h2 class="about-h2">{data.coverageTitle}</h2><p>{data.coverageIntro}</p></div><div class="about-cov-g">{coverageItems.map((item) => <a href={item.link || '#'} class="about-cv"><div class="about-cv-n">{item.number}</div><div class="about-cv-t">{item.title}</div><p class="about-cv-x">{item.text}</p></a>)}</div></div></section>
+17|  <section id="standards" class="about-std"><div class="about-w"><div class="about-std-h"><div class="about-std-eye"><i></i><span>{data.standardsEyebrow}</span><i></i></div><h2 class="about-h2">{data.standardsTitle}</h2><p>{data.standardsIntro}</p></div><div class="about-std-list">{standards.map((item) => <div class="about-sr"><div class="about-sr-n">{item.number}</div><div class="about-sr-t">{item.title}</div><p class="about-sr-x">{item.text}</p></div>)}</div></div></section>
+18|  <section id="independence" class="about-ind"><div class="about-ind-in"><div class="about-ind-img" aria-hidden="true"></div><div class="about-ind-b"><div class="about-ind-eye"><i></i><span>{data.independenceEyebrow}</span></div><h2>{data.independenceTitle}</h2><p>{data.independenceParagraphOne}</p><p>{data.independenceParagraphTwo}</p><a href={data.independenceButtonLink || '#'} class="about-lnk">{data.independenceButtonText}</a></div></div></section>
+19|  <section id="newsroom" class="about-nr"><div class="about-w"><div class="about-nr-h"><div class="about-std-eye"><i></i><span>{data.newsroomEyebrow}</span><i></i></div><h2 class="about-h2">{data.newsroomTitle}</h2><p>{data.newsroomIntro}</p></div><div class="about-nr-g">{contacts.map((item) => <a href={item.email ? 'mailto:' + item.email : '#'} class="about-nc"><div class="about-nc-i" set:html={icon(item.icon)} /><div class="about-nc-t">{item.title}</div><span class="about-nc-v">{item.email}</span><p class="about-nc-x">{item.text}</p></a>)}</div></div></section>
+20|</section>
+
+==================== src\components\blocks\about-mockup17.template.ts ====================
+1|export const aboutMockup17BlockSchema = {
+2|  name: 'aboutMockup17',
+3|  label: 'About Page - Mockup 17',
+4|  fields: [
+5|    { name: 'eyebrow', label: 'Hero Eyebrow', type: 'string' },
+6|    { name: 'headline', label: 'Hero Headline', type: 'string' },
+7|    { name: 'lede', label: 'Hero Lede', type: 'string', ui: { component: 'textarea' } },
+8|    { name: 'purposeEyebrow', label: 'Purpose Eyebrow', type: 'string' },
+9|    { name: 'purposeTitle', label: 'Purpose Title', type: 'string' },
+10|    { name: 'purposeParagraphOne', label: 'Purpose Paragraph 1', type: 'string', ui: { component: 'textarea' } },
+11|    { name: 'purposePullquote', label: 'Purpose Pullquote', type: 'string', ui: { component: 'textarea' } },
+12|    { name: 'purposeParagraphTwo', label: 'Purpose Paragraph 2', type: 'string', ui: { component: 'textarea' } },
+13|    { name: 'coverageEyebrow', label: 'Coverage Eyebrow', type: 'string' },
+14|    { name: 'coverageTitle', label: 'Coverage Title', type: 'string' },
+15|    { name: 'coverageIntro', label: 'Coverage Intro', type: 'string', ui: { component: 'textarea' } },
+16|    { name: 'coverageItems', label: 'Coverage Cards', type: 'object', list: true, fields: [{ name: 'number', label: 'Number', type: 'string' }, { name: 'title', label: 'Title', type: 'string' }, { name: 'text', label: 'Text', type: 'string', ui: { component: 'textarea' } }, { name: 'link', label: 'Link', type: 'string' }] },
+17|    { name: 'standardsEyebrow', label: 'Standards Eyebrow', type: 'string' },
+18|    { name: 'standardsTitle', label: 'Standards Title', type: 'string' },
+19|    { name: 'standardsIntro', label: 'Standards Intro', type: 'string', ui: { component: 'textarea' } },
+20|    { name: 'standards', label: 'Standards Rows', type: 'object', list: true, fields: [{ name: 'number', label: 'Number', type: 'string' }, { name: 'title', label: 'Title', type: 'string' }, { name: 'text', label: 'Text', type: 'string', ui: { component: 'textarea' } }] },
+21|    { name: 'independenceEyebrow', label: 'Independence Eyebrow', type: 'string' },
+22|    { name: 'independenceTitle', label: 'Independence Title', type: 'string' },
+23|    { name: 'independenceParagraphOne', label: 'Independence Paragraph 1', type: 'string', ui: { component: 'textarea' } },
+24|    { name: 'independenceParagraphTwo', label: 'Independence Paragraph 2', type: 'string', ui: { component: 'textarea' } },
+25|    { name: 'independenceButtonText', label: 'Independence Button Text', type: 'string' },
+26|    { name: 'independenceButtonLink', label: 'Independence Button Link', type: 'string' },
+27|    { name: 'newsroomEyebrow', label: 'Newsroom Eyebrow', type: 'string' },
+28|    { name: 'newsroomTitle', label: 'Newsroom Title', type: 'string' },
+29|    { name: 'newsroomIntro', label: 'Newsroom Intro', type: 'string', ui: { component: 'textarea' } },
+30|    { name: 'contacts', label: 'Contact Cards', type: 'object', list: true, fields: [{ name: 'icon', label: 'Icon', type: 'string', options: ['chat', 'alert', 'document'] }, { name: 'title', label: 'Title', type: 'string' }, { name: 'email', label: 'Email', type: 'string' }, { name: 'text', label: 'Text', type: 'string', ui: { component: 'textarea' } }] },
+31|  ],
+32|};
+
+==================== tina\collections\page.ts ====================
+1|import type { Collection } from 'tinacms';
+2|import { heroBlockSchema } from '../../src/components/blocks/hero.template';
+3|import { featuresBlockSchema } from '../../src/components/blocks/features.template';
+4|import { statsBlockSchema } from '../../src/components/blocks/stats.template';
+5|import { ctaBlockSchema } from '../../src/components/blocks/cta.template';
+6|import { testimonialBlockSchema } from '../../src/components/blocks/testimonial.template';
+7|import { calloutBlockSchema } from '../../src/components/blocks/callout.template';
+8|import { contentBlockSchema } from '../../src/components/blocks/content.template';
+9|import { videoBlockSchema } from '../../src/components/blocks/video.template';
+10|import { splitBlockSchema } from '../../src/components/blocks/split.template';
+11|import { aboutMockup17BlockSchema } from '../../src/components/blocks/about-mockup17.template';
+12|import { seoFields } from '../fields/seo';
+13|import { viewFrontendField } from '../fields/view-frontend';
+14|
+15|function slugifyFilename(value?: string | null): string {
+16|  if (!value || typeof value !== "string") return "untitled";
+17|  let input = value.trim().toLowerCase();
+18|  if (!input) return "untitled";
+19|
+20|  if (input.startsWith("http://") || input.startsWith("https://")) {
+21|    const parts = input.split("/");
+22|    input = parts.slice(3).join("/");
+23|  }
+24|
+25|  input = input.split("?")[0].split("#")[0];
+26|  input = input.split("\\").join("/");
+27|  while (input.startsWith("/")) input = input.slice(1);
+28|  while (input.endsWith("/")) input = input.slice(0, -1);
+29|  if (input.startsWith("blog/")) input = input.slice(5);
+30|
+31|  let output = "";
+32|  let lastWasDash = false;
+33|  for (const ch of input) {
+34|    const isLetter = ch >= "a" && ch <= "z";
+35|    const isNumber = ch >= "0" && ch <= "9";
+36|    const isSlash = ch === "/";
+37|    const isAllowed = isLetter || isNumber || isSlash || ch === "-" || ch === "_" || ch === ".";
+38|    if (isAllowed) {
+39|      output += ch;
+40|      lastWasDash = false;
+41|    } else if (!lastWasDash) {
+42|      output += "-";
+43|      lastWasDash = true;
+44|    }
+45|  }
+46|
+47|  while (output.startsWith("-")) output = output.slice(1);
+48|  while (output.endsWith("-")) output = output.slice(0, -1);
+49|  while (output.includes("//")) output = output.split("//").join("/");
+50|  return output || "untitled";
+51|}
+52|
+53|function toPublicSlug(value?: string | null): string {
+54|  if (!value || typeof value !== "string") return "";
+55|  let input = value.trim().toLowerCase();
+56|  if (!input) return "";
+57|
+58|  if (input.startsWith("http://") || input.startsWith("https://")) {
+59|    const parts = input.split("/");
+60|    input = parts.slice(3).join("/");
+61|  }
+62|  input = input.split("?")[0].split("#")[0];
+63|  input = input.split("\\").join("/");
+64|  while (input.startsWith("/")) input = input.slice(1);
+65|  while (input.endsWith("/")) input = input.slice(0, -1);
+66|  if (input.startsWith("blog/")) input = input.slice(5);
+67|
+68|  let out = "";
+69|  let dash = false;
+70|  for (const ch of input) {
+71|    const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+72|    if (ok) { out += ch; dash = false; }
+73|    else if (!dash) { out += "-"; dash = true; }
+74|  }
+75|  while (out.startsWith("-")) out = out.slice(1);
+76|  while (out.endsWith("-")) out = out.slice(0, -1);
+77|  return out;
+78|}
+79|
+80|export const PageCollection: Collection = {
+81|  name: 'page',
+82|  label: 'Pages',
+83|  path: 'src/content/page',
+84|  format: 'mdx',
+85|  ui: {
+86|    filename: {
+87|      readonly: false,
+88|      parse: (filename) => slugifyFilename(filename),
+89|      slugify: (values) => slugifyFilename(values?.title || 'untitled'),
+90|    },
+91|    router: ({ document }) => {
+92|      const slug = toPublicSlug(document?.permalink) || toPublicSlug(document?._sys?.filename);
+93|      return slug ? "/" + slug : "/";
+94|    },
+95|  },
+96|  fields: [
+97|    viewFrontendField('page'),
+98|    {
+99|      name: 'title',
+100|      label: 'Title',
+101|      type: 'string',
+102|      isTitle: true,
+103|      required: true,
+104|      description: 'Main visible page title shown at the top of the frontend page.',
+105|    },
+106|    {
+107|      name: "permalink",
+108|      label: "Filename / Permalink",
+109|      type: "string",
+110|      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url. Leave blank to use the actual filename.",
+111|    },
+112|    seoFields,
+113|    {
+114|      type: 'object',
+115|      list: true,
+116|      name: 'blocks',
+117|      label: 'Page Sections',
+118|      description:
+119|        "The visible content of the page. When the page starts with a Hero block, its Headline is the main on-page heading â€” edit that to change what visitors see at the top.",
+120|      ui: { visualSelector: true },
+121|      templates: [
+122|        aboutMockup17BlockSchema,
+123|        heroBlockSchema,
+124|        calloutBlockSchema,
+125|        featuresBlockSchema,
+126|        statsBlockSchema,
+127|        ctaBlockSchema,
+128|        contentBlockSchema,
+129|        testimonialBlockSchema,
+130|        videoBlockSchema,
+131|        splitBlockSchema,
+132|      ],
+133|    },
+134|  ],
+135|};
+
+==================== src\content\page\about.mdx ====================
+1|---
+2|title: About
+3|permalink: about
+4|blocks:
+5|  - _template: aboutMockup17
+6|    eyebrow: About Splash News Wire
+7|    headline: An independent publication for American readers.
+8|    lede: Splash News Wire publishes news, analysis, and reporting across the topics that shape American public life.
+9|    purposeEyebrow: Why we publish
+10|    purposeTitle: Our Purpose
+11|    purposeParagraphOne: Splash News Wire exists to inform readers with clear, accurate, and useful reporting on the events, decisions, and developments that matter to daily life in the United States.
+12|    purposePullquote: Coverage that is neither watered down for the sake of speed nor bloated for the sake of length.
+13|    purposeParagraphTwo: The publication aims to bring readers that standard of coverage, and to do so with a plainly stated set of editorial standards that any reader can hold us to.
+14|    coverageEyebrow: What we report on
+15|    coverageTitle: Coverage
+16|    coverageIntro: Coverage aims to reflect both the major national stories of the day and the practical, useful reporting that helps readers make sense of what is happening in their communities and around them.
+17|    coverageItems:
+18|      - number: '01'
+19|        title: National News & Politics
+20|        text: Government, public affairs, and the decisions shaping the national conversation.
+21|        link: /blog/category/national-news/
+22|      - number: '02'
+23|        title: Business & Economy
+24|        text: Companies, markets, industries, and the economic forces reaching households.
+25|        link: /blog/category/business/
+26|      - number: '03'
+27|        title: Technology
+28|        text: Innovation, digital trends, and the products changing how people live and work.
+29|        link: /blog/category/technology/
+30|      - number: '04'
+31|        title: Health & Science
+32|        text: Research, medical advances, and discoveries affecting everyday life.
+33|        link: /blog/category/science/
+34|      - number: '05'
+35|        title: Lifestyle & Culture
+36|        text: Travel, entertainment, food, and the trends reflecting how people spend their time.
+37|        link: /blog/category/lifestyle/
+38|      - number: '06'
+39|        title: General-Interest Features
+40|        text: Practical reporting and features that put current events into perspective.
+41|        link: /blog/
+42|    standardsEyebrow: Editorial commitments
+43|    standardsTitle: What We Stand For
+44|    standardsIntro: Five commitments govern the reporting. They are stated plainly so readers know what to expect and where to hold us to account.
+45|    standards:
+46|      - number: '01'
+47|        title: Accuracy
+48|        text: Accuracy is the first commitment. Every factual claim published on the site should be verifiable, and errors discovered after publication are corrected openly on the record.
+49|      - number: '02'
+50|        title: Fairness
+51|        text: Fairness governs the treatment of the people and organizations covered in the reporting. Subjects of substantive allegations are given a meaningful opportunity to respond before publication, and the reporting reflects that response where it is given.
+52|      - number: '03'
+53|        title: Independence
+54|        text: Independence from commercial pressure is protected as a matter of editorial practice. Coverage decisions are made by the editorial team on the merits of the story, not on the basis of advertising or sponsorship relationships.
+55|      - number: '04'
+56|        title: Transparency
+57|        text: Transparency about the kind of piece a reader is looking at matters. News reporting, analysis, opinion, and sponsored content are labeled clearly and kept visibly distinct.
+58|      - number: '05'
+59|        title: Accessible Language
+60|        text: Accessibility of language matters as well. Reporting is written for a general reader, without unnecessary jargon.
+61|    independenceEyebrow: A note on independence
+62|    independenceTitle: The editorial side is kept separate from the commercial side.
+63|    independenceParagraphOne: Splash News Wire is editorially independent. The publication accepts advertising and, on occasion, sponsored content, but the editorial operation is kept separate from the commercial side of the site.
+64|    independenceParagraphTwo: Advertisers and sponsors do not review, approve, or influence editorial coverage before publication.
+65|    independenceButtonText: Read the Sponsored Content Policy
+66|    independenceButtonLink: /sponsored-content-policy/
+67|    newsroomEyebrow: Get in touch
+68|    newsroomTitle: Reach the Newsroom
+69|    newsroomIntro: Story tips, correction requests, letters from readers, and other correspondence intended for the editorial team reach the publication through the addresses below.
+70|    contacts:
+71|      - icon: chat
+72|        title: Story Tips & Letters
+73|        email: editorial@splashnewswire.com
+74|        text: Tips, reader letters, and correspondence intended for the editorial team.
+75|      - icon: alert
+76|        title: Corrections
+77|        email: corrections@splashnewswire.com
+78|        text: Include the article link, the specific error, and the correct information.
+79|      - icon: document
+80|        title: Write for Us
+81|        email: contribute@splashnewswire.com
+82|        text: The submission process for outside contributors is set out on the Write for Us page.
+83|seo:
+84|  title: About Splash News Wire
+85|  description: Splash News Wire publishes news, analysis, and reporting across the topics that shape American public life.
+86|---
+
+==================== src\pages\[...slug].astro ====================
+1|---
+2|import { getPageRouteSlug } from '../lib/permalinks';
+3|import Base from '../layouts/Base.astro';
+4|import TinaIsland from '@tinacms/astro/TinaIsland.astro';
+5|import PageBody from '../components/islands/PageBody.astro';
+6|import { getConfig, getPage, listPages } from '../lib/data';
+7|import { islands } from '../lib/islands';
+8|
+9|export async function getStaticPaths() {
+10|  const pages = await listPages();
+11|  return pages
+12|    .filter((node) => node._sys.filename !== 'home')
+13|    .map((node) => ({
+14|      params: { slug: getPageRouteSlug(node) },
+15|      props: { documentSlug: node._sys.filename },
+16|    }));
+17|}
+18|
+19|const routeSlug = (Astro.params.slug ?? '').toString();
+20|const allPages = await listPages();
+21|const matchedPage = allPages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
+22|const documentSlug = Astro.props.documentSlug ?? matchedPage?._sys.filename ?? routeSlug;
+23|const page = await getPage(documentSlug);
+24|const data = page.data?.page;
+25|if (!data) return new Response('Not Found', { status: 404 });
+26|const config = (await getConfig()).data?.config ?? null;
+27|const seo = data.seo ?? null;
+28|const title = seo?.metaTitle || data.seoTitle || config?.seo?.title || 'TinaCMS + Astro';
+29|const description = seo?.metaDescription || config?.seo?.description || 'Welcome to my website!';
+30|---
+31|
+32|<Base
+33|  title={title}
+34|  description={description}
+35|  image={seo?.ogImage || undefined}
+36|  ogTitle={seo?.ogTitle || title}
+37|  ogDescription={seo?.metaDescription || description}
+38|  canonicalUrl={seo?.canonicalUrl || undefined}
+39|  noindex={seo?.noindex || false}
+40|  nofollow={seo?.nofollow || false}
+41|>
+42|  <TinaIsland name="page" wrapper={islands.page.wrapper} params={{ slug: documentSlug }} primary>
+43|    <PageBody data={data} />
+44|  </TinaIsland>
+45|</Base>
+
+==================== RELATED BLOCK FILES ====================
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\about-mockup17.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\AboutMockup17Block.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Blocks.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Callout.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\callout.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Content.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\content.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Cta.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\cta.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Features.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\features.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Hero.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\hero.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Split.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\split.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Stats.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\stats.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Testimonial.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\testimonial.template.ts
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\Video.astro
+C:\Users\ADMIN\Desktop\Astro\tina-blog\src\components\blocks\video.template.ts
+
+==================== SEARCH MARKERS ====================
+MATCH: src\components\blocks\about-mockup17.template.ts
+MATCH: src\components\islands\PageBody.astro
+MATCH: src\content\page\about.mdx
+MATCH: src\content\page\home.mdx
+MATCH: src\content\page\privacy-policy.mdx
+MATCH: src\lib\islands.ts
+MATCH: src\pages\[...slug].astro
+MATCH: src\styles\global.css
+MATCH: src\styles\global.css.20260826-013633.bak
+MATCH: src\styles\global.css.20260826-014031.bak
+MATCH: src\styles\global.css.20260826-014445.bak
+MATCH: src\styles\global.css.20260826-014512.bak
+MATCH: src\styles\global.css.20260826-014555.bak
+MATCH: src\styles\global.css.20260826-014754.bak
+MATCH: src\styles\global.css.20260826-015438.bak
+MATCH: src\styles\global.css.20260826-015732.bak
+MATCH: src\styles\global.css.20260826-020216.bak
+MATCH: src\styles\global.css.20260826-020549.bak
+MATCH: src\styles\global.css.20260826-020930.bak
+MATCH: src\styles\global.css.20260826-021605.bak
+MATCH: src\styles\global.css.20260826-021920.bak
+MATCH: src\styles\global.css.20260826-022228.bak
+MATCH: src\styles\global.css.20260826-022611.bak
+MATCH: src\styles\global.css.20260826-022956.bak
+MATCH: src\styles\global.css.20260826-023524.bak
+MATCH: src\styles\global.css.20260826-023917.bak
+MATCH: src\styles\global.css.20260826-024302.bak
+MATCH: src\styles\global.css.20260826-025059.bak
+MATCH: src\styles\global.css.bak
+MATCH: tina\tina-lock.json
+MATCH: tina\collections\page.ts
+MATCH: tina\__generated__\config.prebuild.jsx
+MATCH: tina\__generated__\frags.gql
+MATCH: tina\__generated__\schema.gql
+MATCH: tina\__generated__\types.js
+MATCH: tina\__generated__\types.ts
+MATCH: tina\__generated__\_graphql.json
+MATCH: tina\__generated__\_lookup.json
+MATCH: tina\__generated__\_schema.json

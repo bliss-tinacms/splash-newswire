@@ -1,11 +1,29 @@
 ---
 import Blocks from '../blocks/Blocks.astro';
-import type { CmsPage } from '../../lib/data';
-
-interface Props {
-	data?: CmsPage | null;
-}
+import AboutMockup17Block from '../blocks/AboutMockup17Block.astro';
 
 const { data } = Astro.props;
+const pageBlocks = Array.isArray(data?.blocks) ? data.blocks : [];
+const isAboutMockup17Block = (block) =>
+  block?._template === 'aboutMockup17' ||
+  block?.__typename === 'PageBlocksAboutMockup17';
+const isContactMockup17Block = (block) =>
+  block?._template === 'contactMockup17' ||
+  block?.__typename === 'PageBlocksContactMockup17';
+const aboutMockup17Block = pageBlocks.find(isAboutMockup17Block);
+const contactMockup17Block = pageBlocks.find(isContactMockup17Block);
+const regularBlocks = pageBlocks.filter((block) => !isAboutMockup17Block(block));
+const isOurTeamMockup17Block = (block) =>
+  block?._template === 'ourTeamMockup17' ||
+  block?.__typename === 'PageBlocksOurTeamMockup17';
+const ourTeamMockup17Block = pageBlocks.find(isOurTeamMockup17Block);
+const showPageTitle = Boolean(data?.title && data?._sys?.filename !== 'home' && !aboutMockup17Block && !contactMockup17Block && !ourTeamMockup17Block);
 ---
-{data && <Blocks data={data} />}
+
+{data && (
+  <>
+    {showPageTitle && <h1 class="single-page-title">{data.title}</h1>}
+    {aboutMockup17Block && <AboutMockup17Block data={aboutMockup17Block} />}
+    {regularBlocks.length > 0 && <Blocks data={{ ...data, blocks: regularBlocks }} />}
+  </>
+)}

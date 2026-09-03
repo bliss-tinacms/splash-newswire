@@ -11,8 +11,8 @@ import type { BlogQuery, ConfigQuery, PageQuery } from '../../tina/__generated__
 import type { CmsBlog, CmsConfig, CmsPage } from './data';
 import PageBody from '../components/islands/PageBody.astro';
 import BlogBody from '../components/islands/BlogBody.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import Header from '../templates/Header.astro';
+import Footer from '../templates/Footer.astro';
 import { getBlog, getConfig, getPage } from './data';
 
 export const islands: IslandRegistry = {

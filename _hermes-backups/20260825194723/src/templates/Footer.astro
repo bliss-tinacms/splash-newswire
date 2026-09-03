@@ -1,0 +1,61 @@
+---
+import footerNavigation from '../content/navigation/footer.json';
+import siteConfig from '../content/config/config.json';
+
+const footerMenuItems = (footerNavigation.items || []).filter((item) => item && item.label && item.href);
+
+const normalizeMediaPath = (image) => {
+  const raw = typeof image === 'string'
+    ? image
+    : image?.src || image?.url || image?.path || image?.filename || '';
+  if (!raw) return '';
+  let value = String(raw).trim().replace(/\\/g, '/');
+  if (!value) return '';
+  if (/^(https?:)?///.test(value) || value.startsWith('data:')) return value;
+  value = value.replace(/^.//, '');
+  value = value.replace(/^..//, '');
+  value = value.replace(/^public//, '');
+  value = value.replace(/^src/public//, '');
+  value = value.replace(/^static//, '');
+  if (value.startsWith('/public/')) value = value.slice('/public'.length);
+  if (!value.startsWith('/')) value = '/' + value;
+  return value.replace(//+/g, '/');
+};
+
+const footerLogo = normalizeMediaPath(siteConfig.footerLogo) || normalizeMediaPath(siteConfig.logo) || normalizeMediaPath(siteConfig.headerLogo) || normalizeMediaPath(siteConfig.siteLogo);
+---
+
+<footer class="foot">
+  <div class="w">
+    <div class="foot-hero">
+      <div class="fh-l">
+        {footerLogo ? (
+          <img src={footerLogo} alt="Splash Newswire" class="fh-logo" loading="lazy" decoding="async" />
+        ) : (
+          <div class="fh-wordmark" aria-label="Splash Newswire">
+            <span class="fh-mark" aria-hidden="true"></span>
+            <span>Splash Newswire</span>
+          </div>
+        )}
+        <p class="fh-p">Share news that matters. From company announcements and community developments to events and noteworthy updates, your story can start here.</p>
+      </div>
+      <div class="fh-r">
+        <div class="fh-eye">Have news to share?</div>
+        <p class="fh-h">Put Your Story on Our Radar</p>
+        <p class="fh-x">Send your announcement, story tip, or noteworthy update to the Splash Newswire editorial team for review and editorial consideration.</p>
+        <a href="/#contact" class="fh-cta">Submit your news →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="w">
+    <div class="foot-btm">
+      <p>© 2026 Splash Newswire. Your news, everywhere it matters.</p>
+      <nav class="foot-legal" aria-label={footerNavigation.title || 'Footer menu'}>
+        {footerMenuItems.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+    </div>
+  </div>
+</footer>
