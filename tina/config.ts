@@ -25,7 +25,7 @@ export default defineConfig({
   // Get this from tina.io
   clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID || process.env.PUBLIC_TINA_CLIENT_ID || process.env.TINA_PUBLIC_CLIENT_ID,
   // Get this from tina.io
-  token: process.env.TINA_TOKEN,
+  token: process.env.NEXT_PUBLIC_TINA_TOKEN || process.env.TINA_PUBLIC_TINA_TOKEN || process.env.TINA_TOKEN,
 
   build: {
     outputFolder: "admin",
