@@ -75,7 +75,8 @@ dist
 .astro
 _hermes-backups
 _hermes-disabled
+*.zip
+*-debug.txt
 .env
 .env.local
 .env.production
-*.zip
