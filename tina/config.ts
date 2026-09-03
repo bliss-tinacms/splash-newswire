@@ -20,6 +20,7 @@ const branch =
   "main";
 
 export default defineConfig({
+  contentApiUrlOverride: process.env.NEXT_PUBLIC_TINA_CONTENT_API_URL || process.env.TINA_PUBLIC_TINA_CONTENT_API_URL,
   branch,
 
   // Get this from tina.io
