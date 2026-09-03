@@ -1,4 +1,4 @@
-import { defineConfig } from "tinacms";
+﻿import { defineConfig } from "tinacms";
 import { BlogCollection } from "./collections/blog";
 import { CategoryCollection } from "./collections/category";
 import { GlobalConfigCollection } from "./collections/global-config";
@@ -8,20 +8,22 @@ import { UserCollection } from "./collections/user";
 
 // Your hosting provider likely exposes this as an environment variable
 const branch =
+  process.env.NEXT_PUBLIC_TINA_BRANCH ||
   process.env.TINA_BRANCH ||
   process.env.PUBLIC_TINA_BRANCH ||
+  process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF ||
   process.env.GITHUB_BRANCH ||
   process.env.VERCEL_GIT_COMMIT_REF ||
-  process.env.WORKERS_CI_BRANCH || // Cloudflare Workers Builds
-  process.env.CF_PAGES_BRANCH || // Cloudflare Pages
-  process.env.HEAD || // Netlify
+  process.env.WORKERS_CI_BRANCH ||
+  process.env.CF_PAGES_BRANCH ||
+  process.env.HEAD ||
   "main";
 
 export default defineConfig({
   branch,
 
   // Get this from tina.io
-  clientId: process.env.PUBLIC_TINA_CLIENT_ID,
+  clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID || process.env.PUBLIC_TINA_CLIENT_ID || process.env.TINA_PUBLIC_CLIENT_ID,
   // Get this from tina.io
   token: process.env.TINA_TOKEN,
 
