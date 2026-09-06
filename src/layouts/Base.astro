@@ -34,7 +34,7 @@ const footerCode = config?.codeInjection?.footerCode?.trim() || '';
 			ogTitle={ogTitle}
 			ogDescription={ogDescription}
 			canonicalUrl={canonicalUrl}
-			favicon={config?.seo?.favicon || undefined}
+			favicon={config?.favicon || config?.seo?.favicon || undefined}
 			noindex={noindex}
 			nofollow={nofollow}
 		/>

@@ -20,5 +20,6 @@
     "footerCode": ""
   },
   "contactLinks": [],
-  "footerStarfield": false
+  "footerStarfield": false,
+  "favicon": "/favicon.svg"
 }

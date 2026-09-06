@@ -41,6 +41,12 @@ export const GlobalConfigCollection: Collection = {
     
     
     {
+      name: "favicon",
+      label: "Site Favicon",
+      type: "image",
+      description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO.",
+    },
+    {
       name: "contactForm",
       label: "Contact Form",
       type: "object",
