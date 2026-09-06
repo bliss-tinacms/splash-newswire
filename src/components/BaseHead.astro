@@ -13,6 +13,7 @@ interface Props {
 	canonicalUrl?: string;
 	noindex?: boolean;
 	nofollow?: boolean;
+	favicon?: string;
 }
 
 const {
@@ -24,11 +25,21 @@ const {
 	canonicalUrl,
 	noindex = false,
 	nofollow = false,
+	favicon = '/favicon.svg',
 } = Astro.props;
 const canonicalURL = canonicalUrl ? new URL(canonicalUrl, Astro.url) : new URL(Astro.url.pathname, Astro.site);
 const socialTitle = ogTitle || title;
 const socialDescription = ogDescription || description;
 const robots = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow'].join(', ');
+const faviconHref = favicon || '/favicon.svg';
+const faviconLower = faviconHref.toLowerCase();
+const faviconType = faviconLower.endsWith('.png')
+	? 'image/png'
+	: faviconLower.endsWith('.ico')
+		? 'image/x-icon'
+		: faviconLower.endsWith('.jpg') || faviconLower.endsWith('.jpeg')
+			? 'image/jpeg'
+			: 'image/svg+xml';
 ---
 
 <script is:inline>
@@ -54,7 +65,7 @@ const robots = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow']
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type={faviconType} href={faviconHref} />
 <meta name="generator" content={Astro.generator} />
 
 <!-- Tina Cloud rewrites media URLs to assets.tina.io in production; warm the connection. -->

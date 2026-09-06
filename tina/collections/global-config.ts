@@ -23,6 +23,12 @@ export const GlobalConfigCollection: Collection = {
         { name: "description", label: "Default Meta Description", type: "string", ui: { component: "textarea" } },
         { name: "siteOwner", label: "Site Owner", type: "string" },
         { name: "logo", label: "Logo", type: "image" },
+        {
+          name: "favicon",
+          label: "Site Favicon",
+          type: "image",
+          description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO.",
+        },
 
     {
       name: "footerLogo",

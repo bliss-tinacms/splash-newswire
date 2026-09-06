@@ -14,6 +14,7 @@ import { ourTeamMockup17BlockSchema } from '../../src/components/blocks/our-team
 import { seoFields } from '../fields/seo';
 import { viewFrontendField } from '../fields/view-frontend';
 import { homepageTemplateBlockSchema } from '../../src/components/blocks/homepage-template.template';
+import { permalinkField } from "../fields/permalink";
 
 function slugifyFilename(value?: string | null): string {
   if (!value || typeof value !== "string") return "untitled";
@@ -92,7 +93,7 @@ export const PageCollection: Collection = {
       slugify: (values) => slugifyFilename(values?.title || 'untitled'),
     },
     router: ({ document }) => {
-      const slug = toPublicSlug(document?.permalink) || toPublicSlug(document?._sys?.filename);
+      const slug = slugifyFilename(document?.permalink) || slugifyFilename(document?._sys?.filename || '');
       return slug ? "/" + slug : "/";
     },
   },
@@ -106,12 +107,7 @@ export const PageCollection: Collection = {
       required: true,
       description: 'Main visible page title shown at the top of the frontend page.',
     },
-    {
-      name: "permalink",
-      label: "Filename / Permalink",
-      type: "string",
-      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url. Leave blank to use the actual filename.",
-    },
+    permalinkField("page"),
     seoFields,
     {
       type: 'object',
