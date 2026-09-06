@@ -425,6 +425,7 @@ fragment ConfigParts on Config {
     description
     siteOwner
     logo
+    favicon
     footerLogo
   }
   contactForm {

@@ -93,7 +93,7 @@ function filenameFromBrowser(kind) {
   return match?.[1] || "";
 }
 function resolveFrontendUrl(kind, values) {
-  const raw = values?.permalink || values?.filename || values?._sys?.filename || filenameFromBrowser(kind) || values?.title || values?.seoTitle || "";
+  const raw = values?.permalink || values?._sys?.filename || values?.filename || filenameFromBrowser(kind) || values?.title || values?.seoTitle || "";
   const slug = normalizeSlug(raw);
   if (kind === "blog") return slug ? "/blog/" + slug + "/" : "/blog/";
   if (!slug || slug === "home" || slug === "index") return "/";
@@ -198,17 +198,121 @@ function viewFrontendField(kind) {
   };
 }
 
+// tina/fields/permalink.ts
+import React2 from "react";
+function slugifyPermalink(value) {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input) return "";
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    input = input.split("/").slice(3).join("/");
+  }
+  input = input.split("?")[0].split("#")[0].replace(/\\/g, "/");
+  input = input.replace(/^\/+|\/+$/g, "");
+  if (input.startsWith("blog/")) input = input.slice(5);
+  return input.split("/").map((part) => part.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).filter(Boolean).join("/");
+}
+function PermalinkUrlField(props) {
+  const input = props?.input || {};
+  const field = props?.field || {};
+  const kind = field?.kind === "page" ? "page" : "blog";
+  const rawValue = String(input.value || "");
+  const value = slugifyPermalink(rawValue);
+  const previewPath = kind === "blog" ? "/blog/" + (value || "filename-slug") + "/" : "/" + (value || "filename-slug") + "/";
+  React2.useEffect(() => {
+    if (rawValue && rawValue !== value && typeof input.onChange === "function") {
+      input.onChange(value);
+    }
+  }, [rawValue, value]);
+  const setValue = (next) => {
+    const normalized = slugifyPermalink(next);
+    if (typeof input.onChange === "function") input.onChange(normalized);
+  };
+  return React2.createElement(
+    "div",
+    {
+      style: {
+        border: "1px solid #bfdbfe",
+        background: "linear-gradient(180deg, #eff6ff 0%, #ffffff 100%)",
+        borderRadius: "12px",
+        padding: "14px",
+        margin: "0 0 18px",
+        boxShadow: "0 6px 14px rgba(37, 99, 235, 0.06)"
+      }
+    },
+    React2.createElement("div", {
+      style: {
+        fontSize: "11px",
+        textTransform: "uppercase",
+        letterSpacing: ".12em",
+        fontWeight: 800,
+        color: "#1d4ed8",
+        marginBottom: "8px"
+      }
+    }, "PERMALINK / URL SLUG"),
+    React2.createElement("input", {
+      name: input.name,
+      value,
+      onChange: (event) => setValue(event?.target?.value || ""),
+      onBlur: (event) => {
+        setValue(event?.target?.value || "");
+        if (typeof input.onBlur === "function") input.onBlur(event);
+      },
+      placeholder: "my-custom-url",
+      autoCapitalize: "none",
+      autoCorrect: "off",
+      spellCheck: false,
+      style: {
+        width: "100%",
+        background: "#fff",
+        border: "1px solid #dbe3ef",
+        borderRadius: "8px",
+        padding: "10px 11px",
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        fontSize: "12px",
+        color: "#334155",
+        boxSizing: "border-box",
+        outline: "none"
+      }
+    }),
+    React2.createElement("div", {
+      style: {
+        marginTop: "8px",
+        background: "#fff",
+        border: "1px solid #e2e8f0",
+        borderRadius: "8px",
+        padding: "9px 11px",
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+        fontSize: "12px",
+        color: "#14577a",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      },
+      title: previewPath
+    }, previewPath),
+    React2.createElement("p", {
+      style: { margin: "10px 0 0", color: "#64748b", fontSize: "12px", lineHeight: 1.45 }
+    }, "Type a URL slug. Spaces, uppercase letters, and punctuation are converted to lowercase dashes automatically.")
+  );
+}
+function permalinkField(kind) {
+  return {
+    name: "permalink",
+    label: "Permalink / URL Slug",
+    type: "string",
+    ui: { component: PermalinkUrlField },
+    kind
+  };
+}
+
 // tina/collections/blog.ts
 function slugifyFilename(value) {
   if (!value || typeof value !== "string") return "untitled";
   let input = value.trim().toLowerCase();
   if (!input) return "untitled";
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    const parts = input.split("/");
-    input = parts.slice(3).join("/");
-  }
-  input = input.split("?")[0].split("#")[0];
-  input = input.split("\\").join("/");
+  if (input.startsWith("http://") || input.startsWith("https://")) input = input.split("/").slice(3).join("/");
+  input = input.split("?")[0].split("#")[0].split("\\").join("/");
   while (input.startsWith("/")) input = input.slice(1);
   while (input.endsWith("/")) input = input.slice(0, -1);
   if (input.startsWith("blog/")) input = input.slice(5);
@@ -243,39 +347,16 @@ var BlogCollection = {
       parse: (filename) => slugifyFilename(filename),
       slugify: (values) => slugifyFilename(values?.title || "untitled")
     },
-    router: ({ document }) => "/blog/" + document._sys.filename
+    router: ({ document }) => "/blog/" + (slugifyFilename(document?.permalink) || slugifyFilename(document?._sys?.filename || ""))
   },
   fields: [
     viewFrontendField("blog"),
-    {
-      type: "string",
-      name: "title",
-      label: "Title",
-      isTitle: true,
-      required: true
-    },
-    {
-      name: "permalink",
-      label: "Filename / Permalink",
-      type: "string",
-      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url or /blog/my-custom-url. Leave blank to use the actual filename."
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "string"
-    },
+    { type: "string", name: "title", label: "Title", isTitle: true, required: true },
+    permalinkField("blog"),
+    { name: "description", label: "Description", type: "string" },
     seoFields,
-    {
-      name: "pubDate",
-      label: "Publication Date",
-      type: "datetime"
-    },
-    {
-      name: "updatedDate",
-      label: "Updated Date",
-      type: "datetime"
-    },
+    { name: "pubDate", label: "Publication Date", type: "datetime" },
+    { name: "updatedDate", label: "Updated Date", type: "datetime" },
     {
       name: "category",
       label: "Category",
@@ -290,20 +371,10 @@ var BlogCollection = {
       collections: ["user"],
       description: "Assign this post to a user profile, similar to a WordPress post author."
     },
-    {
-      name: "heroImage",
-      label: "Hero Image",
-      type: "image"
-    },
+    { name: "heroImage", label: "Hero Image", type: "image" },
     { name: "authorAlt", label: "Author Alt Text", type: "string", description: "Alt text for the author image." },
     { name: "heroImageAlt", label: "Hero Image Alt Text", type: "string", description: "Alt text for the hero image." },
-    {
-      type: "rich-text",
-      name: "body",
-      label: "Body",
-      isBody: true,
-      templates: [youTubeEmbedTemplate]
-    }
+    { type: "rich-text", name: "body", label: "Body", isBody: true, templates: [youTubeEmbedTemplate] }
   ]
 };
 
@@ -356,6 +427,12 @@ var GlobalConfigCollection = {
         { name: "description", label: "Default Meta Description", type: "string", ui: { component: "textarea" } },
         { name: "siteOwner", label: "Site Owner", type: "string" },
         { name: "logo", label: "Logo", type: "image" },
+        {
+          name: "favicon",
+          label: "Site Favicon",
+          type: "image",
+          description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO."
+        },
         {
           name: "footerLogo",
           label: "Footer Logo",
@@ -1060,35 +1137,6 @@ function slugifyFilename2(value) {
   while (output.includes("//")) output = output.split("//").join("/");
   return output || "untitled";
 }
-function toPublicSlug(value) {
-  if (!value || typeof value !== "string") return "";
-  let input = value.trim().toLowerCase();
-  if (!input) return "";
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    const parts = input.split("/");
-    input = parts.slice(3).join("/");
-  }
-  input = input.split("?")[0].split("#")[0];
-  input = input.split("\\").join("/");
-  while (input.startsWith("/")) input = input.slice(1);
-  while (input.endsWith("/")) input = input.slice(0, -1);
-  if (input.startsWith("blog/")) input = input.slice(5);
-  let out = "";
-  let dash = false;
-  for (const ch of input) {
-    const ok = ch >= "a" && ch <= "z" || ch >= "0" && ch <= "9";
-    if (ok) {
-      out += ch;
-      dash = false;
-    } else if (!dash) {
-      out += "-";
-      dash = true;
-    }
-  }
-  while (out.startsWith("-")) out = out.slice(1);
-  while (out.endsWith("-")) out = out.slice(0, -1);
-  return out;
-}
 var PageCollection = {
   name: "page",
   label: "Pages",
@@ -1101,7 +1149,7 @@ var PageCollection = {
       slugify: (values) => slugifyFilename2(values?.title || "untitled")
     },
     router: ({ document }) => {
-      const slug = toPublicSlug(document?.permalink) || toPublicSlug(document?._sys?.filename);
+      const slug = slugifyFilename2(document?.permalink) || slugifyFilename2(document?._sys?.filename || "");
       return slug ? "/" + slug : "/";
     }
   },
@@ -1115,12 +1163,7 @@ var PageCollection = {
       required: true,
       description: "Main visible page title shown at the top of the frontend page."
     },
-    {
-      name: "permalink",
-      label: "Filename / Permalink",
-      type: "string",
-      description: "Edit the public URL slug, similar to WordPress permalink. Example: my-custom-url. Leave blank to use the actual filename."
-    },
+    permalinkField("page"),
     seoFields,
     {
       type: "object",
@@ -1194,16 +1237,14 @@ var UserCollection = {
 };
 
 // tina/config.ts
-var branch = process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.WORKERS_CI_BRANCH || // Cloudflare Workers Builds
-process.env.CF_PAGES_BRANCH || // Cloudflare Pages
-process.env.HEAD || // Netlify
-"main";
+var branch = process.env.NEXT_PUBLIC_TINA_BRANCH || process.env.TINA_BRANCH || process.env.PUBLIC_TINA_BRANCH || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF || process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.WORKERS_CI_BRANCH || process.env.CF_PAGES_BRANCH || process.env.HEAD || "main";
 var config_default = defineConfig({
+  contentApiUrlOverride: process.env.NEXT_PUBLIC_TINA_CONTENT_API_URL || process.env.TINA_PUBLIC_TINA_CONTENT_API_URL,
   branch,
   // Get this from tina.io
-  clientId: process.env.PUBLIC_TINA_CLIENT_ID,
+  clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID || process.env.PUBLIC_TINA_CLIENT_ID || process.env.TINA_PUBLIC_CLIENT_ID,
   // Get this from tina.io
-  token: process.env.TINA_TOKEN,
+  token: process.env.NEXT_PUBLIC_TINA_TOKEN || process.env.TINA_PUBLIC_TINA_TOKEN || process.env.TINA_TOKEN,
   build: {
     outputFolder: "admin",
     publicFolder: "public"

@@ -28,8 +28,8 @@ function filenameFromBrowser(kind: ViewKind) {
 function resolveFrontendUrl(kind: ViewKind, values: Record<string, any>) {
   const raw =
     values?.permalink ||
-    values?.filename ||
     values?._sys?.filename ||
+    values?.filename ||
     filenameFromBrowser(kind) ||
     values?.title ||
     values?.seoTitle ||

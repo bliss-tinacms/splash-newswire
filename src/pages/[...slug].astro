@@ -6,15 +6,7 @@ import PageBody from '../components/islands/PageBody.astro';
 import { getConfig, getPage, listPages } from '../lib/data';
 import { islands } from '../lib/islands';
 
-export async function getStaticPaths() {
-  const pages = await listPages();
-  return pages
-    .filter((node) => node._sys.filename !== 'home')
-    .map((node) => ({
-      params: { slug: getPageRouteSlug(node) },
-      props: { documentSlug: node._sys.filename },
-    }));
-}
+export const prerender = false;
 
 const routeSlug = (Astro.params.slug ?? '').toString();
 const allPages = await listPages();

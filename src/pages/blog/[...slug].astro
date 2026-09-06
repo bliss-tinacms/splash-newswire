@@ -1,4 +1,4 @@
-﻿---
+---
 import { getBlogRouteSlug } from '../../lib/permalinks';
 import BlogPost from '../../layouts/BlogPost.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
@@ -6,13 +6,7 @@ import BlogBody from '../../components/islands/BlogBody.astro';
 import { getBlog, getUser, listBlogs } from '../../lib/data';
 import { islands } from '../../lib/islands';
 
-export async function getStaticPaths() {
-  const posts = await listBlogs();
-  return posts.map((node) => ({
-    params: { slug: getBlogRouteSlug(node) },
-    props: { documentSlug: node._sys.filename },
-  }));
-}
+export const prerender = false;
 
 const routeSlug = (Astro.params.slug ?? '').toString();
 const allPosts = await listBlogs();
