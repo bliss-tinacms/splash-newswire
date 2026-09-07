@@ -48,8 +48,44 @@ function hydratePermalink<T extends { _sys?: { filename?: string | null } | null
 export const getConfig = () =>
 	requestWithMetadata(client.queries.config({ relativePath: 'config.json' }));
 
-export const getHeaderNavigation = () =>
-	requestWithMetadata(client.queries.navigation({ relativePath: 'header.json' }));
+
+async function getLiveNavigation(relativePath: 'header.json' | 'footer.json') {
+	const query = `query Navigation($relativePath: String!) {
+		navigation(relativePath: $relativePath) {
+			title
+			items { label href children { label href } }
+		}
+	}`;
+
+	const endpoints = [
+		process.env.NEXT_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.TINA_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.PUBLIC_TINA_CONTENT_API_URL,
+		'https://www.splashnewswire.com/tina-content-proxy',
+	].filter(Boolean) as string[];
+
+	for (const endpoint of endpoints) {
+		try {
+			const response = await fetch(endpoint, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ query, variables: { relativePath } }),
+				cache: 'no-store',
+			});
+			if (!response.ok) continue;
+			const json = await response.json();
+			if (json?.data?.navigation) return { data: { navigation: json.data.navigation } } as any;
+		} catch (_error) {
+			// fall back below
+		}
+	}
+
+	return requestWithMetadata(client.queries.navigation({ relativePath }));
+}
+
+export const getHeaderNavigation = () => getLiveNavigation('header.json');
+
+export const getFooterNavigation = () => getLiveNavigation('footer.json');
 
 export const getPage = (slug: string) =>
 	requestWithMetadata(client.queries.page({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
@@ -110,5 +146,3 @@ export type TestimonialItem = NonNullable<NonNullable<TestimonialBlock['testimon
 
 /** Tina rich-text bodies are typed as `any` in the generated client; this is what `<TinaMarkdown>` expects. */
 export type RichText = TinaRichTextContent;
-export const getFooterNavigation = () =>
-  requestWithMetadata(client.queries.navigation({ relativePath: 'footer.json' }));
