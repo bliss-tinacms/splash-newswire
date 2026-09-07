@@ -1,4 +1,4 @@
-﻿import type { Collection } from "tinacms";
+import type { Collection } from "tinacms";
 import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
 import { seoFields } from "../fields/seo";
 import { viewFrontendField } from "../fields/view-frontend";
@@ -29,6 +29,28 @@ function slugifyFilename(value?: string | null): string {
   return output || "untitled";
 }
 
+function cleanPublicSlug(value?: string | null): string {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input || input === "untitled") return "";
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  while (input.includes("//")) input = input.split("//").join("/");
+  return input;
+}
+
+function filenameFromDocument(document: any): string {
+  return cleanPublicSlug(document?._sys?.filename || document?._sys?.basename || "");
+}
+
 export const BlogCollection: Collection = {
   name: "blog",
   label: "Blogs",
@@ -40,7 +62,11 @@ export const BlogCollection: Collection = {
       parse: (filename) => slugifyFilename(filename),
       slugify: (values) => slugifyFilename(values?.title || "untitled"),
     },
-    router: ({ document }) => "/blog/" + (slugifyFilename(document?.permalink) || slugifyFilename(document?._sys?.filename || "")),
+    router: ({ document }) => {
+      const raw = cleanPublicSlug((document as any)?.permalink) || filenameFromDocument(document);
+      const slug = raw.startsWith("blog/") ? raw.slice(5) : raw;
+      return slug ? "/blog/" + slug : "/blog/";
+    },
   },
   fields: [
     viewFrontendField("blog"),

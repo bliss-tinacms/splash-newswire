@@ -54,31 +54,26 @@ function slugifyFilename(value?: string | null): string {
   return output || "untitled";
 }
 
-function toPublicSlug(value?: string | null): string {
+function cleanPublicSlug(value?: string | null): string {
   if (!value || typeof value !== "string") return "";
   let input = value.trim().toLowerCase();
-  if (!input) return "";
+  if (!input || input === "untitled") return "";
 
   if (input.startsWith("http://") || input.startsWith("https://")) {
     const parts = input.split("/");
     input = parts.slice(3).join("/");
   }
+
   input = input.split("?")[0].split("#")[0];
   input = input.split("\\").join("/");
   while (input.startsWith("/")) input = input.slice(1);
   while (input.endsWith("/")) input = input.slice(0, -1);
-  if (input.startsWith("blog/")) input = input.slice(5);
+  while (input.includes("//")) input = input.split("//").join("/");
+  return input;
+}
 
-  let out = "";
-  let dash = false;
-  for (const ch of input) {
-    const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
-    if (ok) { out += ch; dash = false; }
-    else if (!dash) { out += "-"; dash = true; }
-  }
-  while (out.startsWith("-")) out = out.slice(1);
-  while (out.endsWith("-")) out = out.slice(0, -1);
-  return out;
+function filenameFromDocument(document: any): string {
+  return cleanPublicSlug(document?._sys?.filename || document?._sys?.basename || "");
 }
 
 export const PageCollection: Collection = {
@@ -93,8 +88,9 @@ export const PageCollection: Collection = {
       slugify: (values) => slugifyFilename(values?.title || 'untitled'),
     },
     router: ({ document }) => {
-      const slug = slugifyFilename(document?.permalink) || slugifyFilename(document?._sys?.filename || '');
-      return slug ? "/" + slug : "/";
+      const slug = cleanPublicSlug((document as any)?.permalink) || filenameFromDocument(document);
+      if (!slug || slug === "home" || slug === "index") return "/";
+      return "/" + slug;
     },
   },
   fields: [
