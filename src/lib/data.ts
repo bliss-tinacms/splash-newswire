@@ -87,8 +87,67 @@ export const getHeaderNavigation = () => getLiveNavigation('header.json');
 
 export const getFooterNavigation = () => getLiveNavigation('footer.json');
 
-export const getPage = (slug: string) =>
-	requestWithMetadata(client.queries.page({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
+
+
+async function getLivePage(slug: string) {
+	const relativePath = slug.endsWith('.mdx') ? slug : slug + '.mdx';
+	const query = `query Page($relativePath: String!) {
+		page(relativePath: $relativePath) {
+			title
+			seoTitle
+			seo {
+				metaTitle
+				metaDescription
+				ogTitle
+				ogDescription
+				ogImage
+				canonicalUrl
+				noindex
+				nofollow
+			}
+			blocks {
+				__typename
+				... on PageBlocksContent { body }
+				... on PageBlocksHero { title subtitle image { src alt } actions { label href variant } }
+				... on PageBlocksCallout { title text }
+				... on PageBlocksCta { title text actions { label href variant } }
+				... on PageBlocksFeatures { title subtitle items { title text icon } }
+				... on PageBlocksSplit { title body reverse image { src alt } actions { label href variant } }
+				... on PageBlocksStats { title items { value label } }
+				... on PageBlocksTestimonial { quote name role avatar }
+				... on PageBlocksVideo { title url caption }
+			}
+			_sys { filename }
+		}
+	}`;
+
+	const endpoints = [
+		process.env.NEXT_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.TINA_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.PUBLIC_TINA_CONTENT_API_URL,
+		'https://www.splashnewswire.com/tina-content-proxy',
+	].filter(Boolean) as string[];
+
+	for (const endpoint of endpoints) {
+		try {
+			const response = await fetch(endpoint, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ query, variables: { relativePath } }),
+				cache: 'no-store',
+			});
+			if (!response.ok) continue;
+			const json = await response.json();
+			if (json?.data?.page) return { data: { page: json.data.page } } as any;
+		} catch (_error) {
+			// Fall back below.
+		}
+	}
+
+	return requestWithMetadata(client.queries.page({ relativePath }), { priority: 'primary' });
+}
+
+export const getPage = (slug: string) => getLivePage(slug);
 
 export const getBlog = (slug: string) =>
 	requestWithMetadata(client.queries.blog({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
