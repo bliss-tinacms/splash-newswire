@@ -198,16 +198,6 @@ function viewFrontendField(kind) {
   };
 }
 
-// tina/fields/permalink.ts
-function permalinkField(kind) {
-  return {
-    name: "permalink",
-    label: "Permalink / URL Slug",
-    type: "string",
-    description: kind === "blog" ? "Type the blog URL slug only, for example: my-custom-post. Dashes are allowed. Do not include /blog/." : "Type the page URL slug only, for example: about-us. Dashes are allowed."
-  };
-}
-
 // tina/collections/blog.ts
 function slugifyFilename(value) {
   if (!value || typeof value !== "string") return "untitled";
@@ -276,7 +266,6 @@ var BlogCollection = {
   fields: [
     viewFrontendField("blog"),
     { type: "string", name: "title", label: "Title", isTitle: true, required: true },
-    permalinkField("blog"),
     { name: "description", label: "Description", type: "string" },
     seoFields,
     { name: "pubDate", label: "Publication Date", type: "datetime" },
@@ -1106,7 +1095,6 @@ var PageCollection = {
       required: true,
       description: "Main visible page title shown at the top of the frontend page."
     },
-    permalinkField("page"),
     seoFields,
     {
       type: "object",
