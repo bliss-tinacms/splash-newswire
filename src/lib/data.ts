@@ -93,8 +93,49 @@ export const getPage = (slug: string) =>
 export const getBlog = (slug: string) =>
 	requestWithMetadata(client.queries.blog({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
 
-export const getUser = (slug: string) =>
-	requestWithMetadata(client.queries.user({ relativePath: `${slug}.json` }));
+
+
+
+async function getLiveUser(slug: string) {
+	const relativePath = slug.endsWith('.json') ? slug : slug + '.json';
+	const query = `query User($relativePath: String!) {
+		user(relativePath: $relativePath) {
+			name
+			role
+			avatar
+			bio
+			email
+			_sys { filename }
+		}
+	}`;
+
+	const endpoints = [
+		process.env.NEXT_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.TINA_PUBLIC_TINA_CONTENT_API_URL,
+		process.env.PUBLIC_TINA_CONTENT_API_URL,
+		'https://www.splashnewswire.com/tina-content-proxy',
+	].filter(Boolean) as string[];
+
+	for (const endpoint of endpoints) {
+		try {
+			const response = await fetch(endpoint, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ query, variables: { relativePath } }),
+				cache: 'no-store',
+			});
+			if (!response.ok) continue;
+			const json = await response.json();
+			if (json?.data?.user) return { data: { user: json.data.user } } as any;
+		} catch (_error) {
+			// Fall back below.
+		}
+	}
+
+	return requestWithMetadata(client.queries.user({ relativePath }));
+}
+
+export const getUser = (slug: string) => getLiveUser(slug);
 
 export async function listPages() {
 	const result = await client.queries.pageConnection();
