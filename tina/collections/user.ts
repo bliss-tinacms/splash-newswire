@@ -1,4 +1,4 @@
-import type { Collection } from "tinacms";
+﻿import type { Collection } from "tinacms";
 
 export const UserCollection: Collection = {
   name: "user",
@@ -7,7 +7,7 @@ export const UserCollection: Collection = {
   format: "json",
   ui: {
     router({ document }) {
-      return `/users/${document._sys.filename}`;
+      return `/blog/author/${document._sys.filename}/`;
     },
   },
   fields: [
@@ -43,3 +43,4 @@ export const UserCollection: Collection = {
     },
   ],
 };
+
