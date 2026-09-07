@@ -31,6 +31,7 @@ const canonicalURL = canonicalUrl ? new URL(canonicalUrl, Astro.url) : new URL(A
 const socialTitle = ogTitle || title;
 const socialDescription = ogDescription || description;
 const robots = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow'].join(', ');
+const faviconUrl = favicon || '/favicon.svg';
 const faviconHref = favicon || '/favicon.svg';
 const faviconLower = faviconHref.toLowerCase();
 const faviconType = faviconLower.endsWith('.png')
@@ -65,7 +66,7 @@ const faviconType = faviconLower.endsWith('.png')
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="icon" type={faviconType} href={faviconHref} />
+<link rel="icon" href={faviconUrl} />
 <meta name="generator" content={Astro.generator} />
 
 <!-- Tina Cloud rewrites media URLs to assets.tina.io in production; warm the connection. -->

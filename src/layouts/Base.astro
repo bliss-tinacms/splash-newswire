@@ -22,6 +22,7 @@ const config = (await getConfig()).data?.config ?? null;
 const headerNavigation = (await getHeaderNavigation()).data?.navigation ?? null;
 const headerCode = config?.codeInjection?.headerCode?.trim() || '';
 const footerCode = config?.codeInjection?.footerCode?.trim() || '';
+const favicon = config?.seo?.favicon || config?.favicon || '/favicon.svg';
 ---
 
 <!doctype html>
@@ -34,9 +35,11 @@ const footerCode = config?.codeInjection?.footerCode?.trim() || '';
 			ogTitle={ogTitle}
 			ogDescription={ogDescription}
 			canonicalUrl={canonicalUrl}
-			favicon={config?.favicon || config?.seo?.favicon || undefined}
+			favicon={config?.seo?.favicon || undefined}
 			noindex={noindex}
 			nofollow={nofollow}
+		
+			favicon={favicon}
 		/>
 		{headerCode && <Fragment set:html={headerCode} />}
 	</head>
