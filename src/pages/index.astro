@@ -2,11 +2,11 @@
 import Base from '../layouts/Base.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
 import FrontPage from '../templates/FrontPage.astro';
-import { getConfig, getPage, listBlogs } from '../lib/data';
+import { getConfig, getPublicPage, listBlogs } from '../lib/data';
 import { islands } from '../lib/islands';
 
 const slug = 'home';
-const page = await getPage(slug);
+const page = await getPublicPage(slug);
 const data = page.data?.page;
 if (!data) return new Response('Not Found', { status: 404 });
 const config = (await getConfig()).data?.config ?? null;

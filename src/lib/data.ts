@@ -89,6 +89,9 @@ export const getFooterNavigation = () => getLiveNavigation('footer.json');
 
 
 
+export const getPage = (slug: string) =>
+	requestWithMetadata(client.queries.page({ relativePath: `${slug}.mdx` }), { priority: 'primary' });
+
 async function getLivePage(slug: string) {
 	const relativePath = slug.endsWith('.mdx') ? slug : slug + '.mdx';
 	const query = `query Page($relativePath: String!) {
@@ -141,7 +144,7 @@ async function getLivePage(slug: string) {
 	return requestWithMetadata(client.queries.page({ relativePath }), { priority: 'primary' });
 }
 
-export const getPage = (slug: string) => getLivePage(slug);
+export const getPublicPage = (slug: string) => getLivePage(slug);
 
 export const getBlog = (slug: string) =>
 	requestWithMetadata(client.queries.blog({ relativePath: `${slug}.mdx` }), { priority: 'primary' });

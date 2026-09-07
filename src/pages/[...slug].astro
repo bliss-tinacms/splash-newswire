@@ -3,7 +3,7 @@ import { getPageRouteSlug } from '../lib/permalinks';
 import Base from '../layouts/Base.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
 import PageBody from '../components/islands/PageBody.astro';
-import { getConfig, getPage, listPages } from '../lib/data';
+import { getConfig, getPublicPage, listPages } from '../lib/data';
 import { islands } from '../lib/islands';
 
 export const prerender = false;
@@ -12,7 +12,7 @@ const routeSlug = (Astro.params.slug ?? '').toString();
 const allPages = await listPages();
 const matchedPage = allPages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
 const documentSlug = matchedPage?._sys.filename ?? routeSlug;
-const page = await getPage(documentSlug);
+const page = await getPublicPage(documentSlug);
 const data = page.data?.page;
 if (!data) return new Response('Not Found', { status: 404 });
 const config = (await getConfig()).data?.config ?? null;
