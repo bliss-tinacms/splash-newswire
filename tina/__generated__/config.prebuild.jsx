@@ -336,6 +336,24 @@ function slugifyFilename(value) {
   while (output.includes("//")) output = output.split("//").join("/");
   return output || "untitled";
 }
+function cleanPublicSlug(value) {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input || input === "untitled") return "";
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  while (input.includes("//")) input = input.split("//").join("/");
+  return input;
+}
+function filenameFromDocument(document) {
+  return cleanPublicSlug(document?._sys?.filename || document?._sys?.basename || "");
+}
 var BlogCollection = {
   name: "blog",
   label: "Blogs",
@@ -347,7 +365,11 @@ var BlogCollection = {
       parse: (filename) => slugifyFilename(filename),
       slugify: (values) => slugifyFilename(values?.title || "untitled")
     },
-    router: ({ document }) => "/blog/" + (slugifyFilename(document?.permalink) || slugifyFilename(document?._sys?.filename || ""))
+    router: ({ document }) => {
+      const raw = cleanPublicSlug(document?.permalink) || filenameFromDocument(document);
+      const slug = raw.startsWith("blog/") ? raw.slice(5) : raw;
+      return slug ? "/blog/" + slug : "/blog/";
+    }
   },
   fields: [
     viewFrontendField("blog"),
@@ -1137,6 +1159,24 @@ function slugifyFilename2(value) {
   while (output.includes("//")) output = output.split("//").join("/");
   return output || "untitled";
 }
+function cleanPublicSlug2(value) {
+  if (!value || typeof value !== "string") return "";
+  let input = value.trim().toLowerCase();
+  if (!input || input === "untitled") return "";
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    const parts = input.split("/");
+    input = parts.slice(3).join("/");
+  }
+  input = input.split("?")[0].split("#")[0];
+  input = input.split("\\").join("/");
+  while (input.startsWith("/")) input = input.slice(1);
+  while (input.endsWith("/")) input = input.slice(0, -1);
+  while (input.includes("//")) input = input.split("//").join("/");
+  return input;
+}
+function filenameFromDocument2(document) {
+  return cleanPublicSlug2(document?._sys?.filename || document?._sys?.basename || "");
+}
 var PageCollection = {
   name: "page",
   label: "Pages",
@@ -1149,8 +1189,9 @@ var PageCollection = {
       slugify: (values) => slugifyFilename2(values?.title || "untitled")
     },
     router: ({ document }) => {
-      const slug = slugifyFilename2(document?.permalink) || slugifyFilename2(document?._sys?.filename || "");
-      return slug ? "/" + slug : "/";
+      const slug = cleanPublicSlug2(document?.permalink) || filenameFromDocument2(document);
+      if (!slug || slug === "home" || slug === "index") return "/";
+      return "/" + slug;
     }
   },
   fields: [
@@ -1245,15 +1286,15 @@ var config_default = defineConfig({
   clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID || process.env.PUBLIC_TINA_CLIENT_ID || process.env.TINA_PUBLIC_CLIENT_ID,
   // Get this from tina.io
   token: process.env.NEXT_PUBLIC_TINA_TOKEN || process.env.TINA_PUBLIC_TINA_TOKEN || process.env.TINA_TOKEN,
-  build: {
-    outputFolder: "admin",
-    publicFolder: "public"
-  },
   media: {
     loadCustomStore: async () => {
       const pack = await import("next-tinacms-cloudinary");
       return pack.TinaCloudCloudinaryMediaStore;
     }
+  },
+  build: {
+    outputFolder: "admin",
+    publicFolder: "public"
   },
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/schema/
   schema: {

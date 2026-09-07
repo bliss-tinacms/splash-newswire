@@ -11,7 +11,7 @@ export const prerender = false;
 const routeSlug = (Astro.params.slug ?? '').toString();
 const allPages = await listPages();
 const matchedPage = allPages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
-const documentSlug = Astro.props.documentSlug ?? matchedPage?._sys.filename ?? routeSlug;
+const documentSlug = matchedPage?._sys.filename ?? routeSlug;
 const page = await getPage(documentSlug);
 const data = page.data?.page;
 if (!data) return new Response('Not Found', { status: 404 });

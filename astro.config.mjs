@@ -58,7 +58,7 @@ export default defineConfig({
 	// of Astro's plain-text "Cross-site" rejection on cPanel/LiteSpeed.
 	security: { checkOrigin: false },
 	site: getSiteUrl(),
-	output: 'static',
+	output: 'server',
 	adapter: await getAdapter(),
 	redirects: { '/home': '/' },
 	integrations: [mdx(), sitemap(), icon(), tina()],
