@@ -2,7 +2,7 @@
   "title": "Header Navigation",
   "items": [
     {
-      "label": "About Us",
+      "label": "About",
       "href": "/about"
     },
     {
