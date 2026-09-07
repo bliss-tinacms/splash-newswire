@@ -94,28 +94,22 @@ async function getLivePage(slug: string) {
 	const query = `query Page($relativePath: String!) {
 		page(relativePath: $relativePath) {
 			title
-			seoTitle
-			seo {
-				metaTitle
-				metaDescription
-				ogTitle
-				ogDescription
-				ogImage
-				canonicalUrl
-				noindex
-				nofollow
-			}
+			seo { metaTitle metaDescription ogTitle ogDescription ogImage canonicalUrl noindex nofollow }
 			blocks {
 				__typename
 				... on PageBlocksContent { body }
-				... on PageBlocksHero { title subtitle image { src alt } actions { label href variant } }
-				... on PageBlocksCallout { title text }
-				... on PageBlocksCta { title text actions { label href variant } }
-				... on PageBlocksFeatures { title subtitle items { title text icon } }
-				... on PageBlocksSplit { title body reverse image { src alt } actions { label href variant } }
-				... on PageBlocksStats { title items { value label } }
-				... on PageBlocksTestimonial { quote name role avatar }
-				... on PageBlocksVideo { title url caption }
+				... on PageBlocksHomepageTemplate { hero { eyebrow title description buttonText buttonLink image imageAlt } why { eyebrow title paragraphOne paragraphTwo standards { label title text } } newsroom { heading subheading submitHeading submitButtonText submitButtonLink prompts { title text } } wireFeature { eyebrow quote author byline image imageAlt } coverage { title description topics { number title text } } contact { eyebrow title description note cards { title email text accent } } }
+				... on PageBlocksAboutMockup17 { hero { eyebrow headline lede } purpose { eyebrow title paragraphOne pullquote paragraphTwo } coverage { eyebrow title intro items { number title text link } } standardsSection { eyebrow title intro items { number title text } } independence { eyebrow title image imageAlt paragraphOne paragraphTwo buttonText buttonLink } newsroom { eyebrow title intro contacts { icon title email text } } }
+				... on PageBlocksOurTeamMockup17 { hero { eyebrow headline lede } leadership { eyebrow title people { name role location image imageAlt bio } } seniorStaff { eyebrow title people { name role location image imageAlt bio } } }
+				... on PageBlocksContactMockup17 { hero { eyebrow headline lede } formSection { eyebrow title description buttonText note formAction subject } inboxes { eyebrow title cards { title description email note } } requests { eyebrow title intro cards { icon title text } } }
+				... on PageBlocksHero { headline tagline starfield image { src alt } actions { label type icon link } }
+				... on PageBlocksCallout { text url }
+				... on PageBlocksCta { title description actions { label type icon link } }
+				... on PageBlocksFeatures { title description items { title text icon } }
+				... on PageBlocksSplit { title body reverse image { src alt } actions { label type icon link } }
+				... on PageBlocksStats { title description stats { stat type } }
+				... on PageBlocksTestimonial { title description testimonials { quote author role avatar } }
+				... on PageBlocksVideo { url autoPlay loop }
 			}
 			_sys { filename }
 		}
