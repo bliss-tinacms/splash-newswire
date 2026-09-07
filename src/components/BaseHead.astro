@@ -27,7 +27,22 @@ const {
 	nofollow = false,
 	favicon = '/favicon.svg',
 } = Astro.props;
-const canonicalURL = canonicalUrl ? new URL(canonicalUrl, Astro.url) : new URL(Astro.url.pathname, Astro.site);
+const HERMES_PRODUCTION_SITE_URL = 'https://www.splashnewswire.com';
+function resolveCanonicalUrl(value?: string | URL | null) {
+	const raw = value ? value.toString() : Astro.url.pathname;
+	const url = new URL(raw, HERMES_PRODUCTION_SITE_URL);
+	// Never allow localhost canonicals/social URLs on the live site.
+	if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+		return new URL(url.pathname, HERMES_PRODUCTION_SITE_URL);
+	}
+	url.protocol = 'https:';
+	url.hostname = 'www.splashnewswire.com';
+	url.port = '';
+	url.search = '';
+	url.hash = '';
+	return url;
+}
+const canonicalURL = canonicalUrl ? resolveCanonicalUrl(canonicalUrl) : resolveCanonicalUrl(Astro.url.pathname);
 const socialTitle = ogTitle || title;
 const socialDescription = ogDescription || description;
 const robots = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow'].join(', ');

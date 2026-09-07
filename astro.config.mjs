@@ -48,7 +48,7 @@ function getSiteUrl() {
 	if (process.env.CF_PAGES_URL) return process.env.CF_PAGES_URL;
 	if (process.env.NETLIFY && process.env.URL) return process.env.URL;
 
-	return 'http://localhost:4321';
+	return 'https://www.splashnewswire.com';
 }
 
 // https://astro.build/config
