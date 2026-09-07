@@ -25,26 +25,17 @@ export const GlobalConfigCollection: Collection = {
         { name: "logo", label: "Logo", type: "image" },
         {
           name: "favicon",
-          label: "Site Favicon",
+          label: "Favicon",
           type: "image",
           description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO.",
         },
-
-    {
-      name: "footerLogo",
-      label: "Footer Logo",
-      type: "image",
-      description: "Upload the logo used in the footer. Falls back to the header logo when empty.",
-    },
+        {
+          name: "footerLogo",
+          label: "Footer Logo",
+          type: "image",
+          description: "Upload the logo used in the footer. Falls back to the header logo when empty.",
+        },
       ],
-    },
-    
-    
-    {
-      name: "favicon",
-      label: "Site Favicon",
-      type: "image",
-      description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO.",
     },
     {
       name: "contactForm",

@@ -429,7 +429,7 @@ var GlobalConfigCollection = {
         { name: "logo", label: "Logo", type: "image" },
         {
           name: "favicon",
-          label: "Site Favicon",
+          label: "Favicon",
           type: "image",
           description: "Upload the browser tab/site icon. Recommended: square PNG, SVG, or ICO."
         },
@@ -1250,9 +1250,9 @@ var config_default = defineConfig({
     publicFolder: "public"
   },
   media: {
-    tina: {
-      mediaRoot: "",
-      publicFolder: "public"
+    loadCustomStore: async () => {
+      const pack = await import("next-tinacms-cloudinary");
+      return pack.TinaCloudCloudinaryMediaStore;
     }
   },
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/schema/
