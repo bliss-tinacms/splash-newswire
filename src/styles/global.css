@@ -6044,3 +6044,48 @@ html {
   }
 }
 /* HERMES_SITEMAP_EQUAL_COLUMNS_END */
+
+/* HERMES_PAGE_BLOG_HEADING_SPACING_START */
+/* Default page/blog heading spacing: 30px top and bottom on desktop, tablet, and mobile. */
+.single-page-title,
+.single-post-title {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.single-post-header {
+  margin-bottom: 30px !important;
+}
+
+.single-page-content-block :where(h1, h2, h3, h4, h5, h6),
+.single-post-content :where(h1, h2, h3, h4, h5, h6),
+.prose :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+}
+
+@media (max-width: 1024px) {
+  .single-page-title,
+  .single-post-title,
+  .single-page-content-block :where(h1, h2, h3, h4, h5, h6),
+  .single-post-content :where(h1, h2, h3, h4, h5, h6),
+  .prose :where(h1, h2, h3, h4, h5, h6) {
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .single-page-title,
+  .single-post-title,
+  .single-page-content-block :where(h1, h2, h3, h4, h5, h6),
+  .single-post-content :where(h1, h2, h3, h4, h5, h6),
+  .prose :where(h1, h2, h3, h4, h5, h6) {
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+  }
+}
+/* HERMES_PAGE_BLOG_HEADING_SPACING_END */
+
