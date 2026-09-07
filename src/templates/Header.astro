@@ -1,4 +1,4 @@
-﻿---
+---
 import { tinaField } from "@tinacms/astro/tina-field";
 import type { CmsConfig } from '../lib/data';
 
@@ -60,14 +60,14 @@ const splashCurrentDate = new Intl.DateTimeFormat('en-US', {
 					const hasChildren = children.length > 0;
 					return (
 						<li class:list={["global-header__menu-item", { "global-header__menu-item--has-children": hasChildren }]}>
-							<a href={item.href || '#'} class="global-header__menu-link" aria-haspopup={hasChildren ? 'true' : undefined} aria-expanded={hasChildren ? 'false' : undefined} data-tina-field={tinaField(item, "title")}>
+							<a href={item.href || '#'} class="global-header__menu-link" aria-haspopup={hasChildren ? 'true' : undefined} aria-expanded={hasChildren ? 'false' : undefined} data-tina-field={tinaField(item, "label")}>
 								<span>{item.label}</span>
 								{hasChildren && <span class="global-header__submenu-caret" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg></span>}
 							</a>
 							{hasChildren && (
 								<ul class="global-header__submenu" aria-label={`${item.label} submenu`}>
 									{children.map((child) => (
-										<li><a href={child.href || '#'} data-tina-field={tinaField(child, "title")}>{child.label}</a></li>
+										<li><a href={child.href || '#'} data-tina-field={tinaField(child, "label")}>{child.label}</a></li>
 									))}
 								</ul>
 							)}

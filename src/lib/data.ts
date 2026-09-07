@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Per-collection data loaders + the data shapes they return.
  *
  * Loaders call the generated Tina client and pipe the result through

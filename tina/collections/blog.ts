@@ -1,8 +1,7 @@
 import type { Collection } from "tinacms";
 import { youTubeEmbedTemplate } from "../../src/components/mdx/YouTubeEmbed.template";
 import { seoFields } from "../fields/seo";
-import { viewFrontendField } from "../fields/view-frontend";
-import { permalinkField } from "../fields/permalink";
+import { viewFrontendField } from "../fields/view-frontend";
 
 function slugifyFilename(value?: string | null): string {
   if (!value || typeof value !== "string") return "untitled";
@@ -70,8 +69,7 @@ export const BlogCollection: Collection = {
   },
   fields: [
     viewFrontendField("blog"),
-    { type: "string", name: "title", label: "Title", isTitle: true, required: true },
-    permalinkField("blog"),
+    { type: "string", name: "title", label: "Title", isTitle: true, required: true },
     { name: "description", label: "Description", type: "string" },
     seoFields,
     { name: "pubDate", label: "Publication Date", type: "datetime" },
