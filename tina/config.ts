@@ -1,4 +1,4 @@
-﻿import { defineConfig } from "tinacms";
+import { defineConfig } from "tinacms";
 import { BlogCollection } from "./collections/blog";
 import { CategoryCollection } from "./collections/category";
 import { GlobalConfigCollection } from "./collections/global-config";
