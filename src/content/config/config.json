@@ -4,8 +4,8 @@
     "description": "Read independent U.S. news, analysis, and reporting from Splash Newswire on politics, business, technology, health, culture, lifestyle, and more.",
     "siteOwner": "Splash Newswire",
     "logo": "/Splash-Newswire-Logo-Medium.png",
-    "footerLogo": "/Splash-Newswire-Logo-White.png",
-    "favicon": "/favicon.svg"
+    "favicon": "https://res.cloudinary.com/qwdyyii2/image/upload/v1788782745/favicon.png",
+    "footerLogo": "/Splash-Newswire-Logo-White.png"
   },
   "contactForm": {
     "formspreeEndpoint": "https://formspree.io/f/mwlejdvo",
@@ -20,6 +20,5 @@
     "footerCode": ""
   },
   "contactLinks": [],
-  "footerStarfield": false,
-  "favicon": "/favicon.svg"
+  "footerStarfield": false
 }
