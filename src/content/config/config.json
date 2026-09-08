@@ -8,7 +8,7 @@
     "footerLogo": "/Splash-Newswire-Logo-White.png"
   },
   "contactForm": {
-    "formspreeEndpoint": "https://formspree.io/f/mwlejdvo",
+    "formspreeEndpoint": "3333",
     "heading": "You live here. You see things we don't.",
     "description": "Story tips, correction requests, contributor inquiries, and general reader correspondence all reach a person on the newsroom staff.",
     "buttonText": "Send to the newsroom",
