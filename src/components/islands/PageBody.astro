@@ -24,6 +24,6 @@ const showPageTitle = Boolean(data?.title && data?._sys?.filename !== 'home' && 
   <>
     {showPageTitle && <h1 class="single-page-title">{data.title}</h1>}
     {aboutMockup17Block && <AboutMockup17Block data={aboutMockup17Block} />}
-    {regularBlocks.length > 0 && <Blocks data={{ ...data, blocks: regularBlocks }} />}
+    {regularBlocks.length > 0 && <Blocks data={{ ...data, blocks: regularBlocks }} config={config} />}
   </>
 )}

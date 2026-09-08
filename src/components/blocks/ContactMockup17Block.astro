@@ -1,5 +1,5 @@
 ---
-const { data = {} } = Astro.props;
+const { data = {}, config = null } = Astro.props;
 const hero = data.hero ?? {};
 const formSection = data.formSection ?? {};
 const inboxes = data.inboxes ?? {};
