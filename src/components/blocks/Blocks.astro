@@ -16,9 +16,10 @@ import type { CmsPage } from '../../lib/data';
 
 interface Props {
 	data?: CmsPage | null;
+	config?: any;
 }
 
-const { data } = Astro.props;
+const { data, config = null } = Astro.props;
 const blocks = (data?.blocks ?? []).filter(b => b !== null);
 ---
 {blocks.map((block, i) => {
@@ -26,7 +27,7 @@ const blocks = (data?.blocks ?? []).filter(b => b !== null);
 		switch (block.__typename) {
 			case 'PageBlocksCallout': return <Callout data={block} />;
 			case 'PageBlocksOurTeamMockup17': return <OurTeamMockup17Block data={block} />;
-			case 'PageBlocksContactMockup17': return <ContactMockup17Block data={block} />;
+			case 'PageBlocksContactMockup17': return <ContactMockup17Block data={block} config={config} />;
 			case 'PageBlocksContent': return <Content data={block} />;
 			case 'PageBlocksCta': return <Cta data={block} />;
 			case 'PageBlocksFeatures': return <Features data={block} />;

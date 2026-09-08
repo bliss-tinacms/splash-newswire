@@ -6,7 +6,8 @@ const inboxes = data.inboxes ?? {};
 const requests = data.requests ?? {};
 const inboxCards = Array.isArray(inboxes.cards) ? inboxes.cards : [];
 const requestCards = Array.isArray(requests.cards) ? requests.cards : [];
-const formAction = formSection.formAction || '';
+const globalFormspreeEndpoint = config?.contactForm?.formspreeEndpoint || '';
+const formAction = globalFormspreeEndpoint || formSection.formAction || '';
 const formMethod = formAction ? 'POST' : undefined;
 const buttonText = (formSection.buttonText || 'Send message').replace(/\s*(â†’|Ã¢â€ â€™|Ã‚â€ â€™|ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢)\s*$/g, '');
 ---

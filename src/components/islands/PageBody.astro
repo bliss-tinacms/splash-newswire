@@ -2,7 +2,7 @@
 import Blocks from '../blocks/Blocks.astro';
 import AboutMockup17Block from '../blocks/AboutMockup17Block.astro';
 
-const { data } = Astro.props;
+const { data, config = null } = Astro.props;
 const pageBlocks = Array.isArray(data?.blocks) ? data.blocks : [];
 const isAboutMockup17Block = (block) =>
   block?._template === 'aboutMockup17' ||
