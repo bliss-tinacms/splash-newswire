@@ -9,6 +9,8 @@ function cleanSlug(value?: string | null): string {
   while (input.startsWith("/")) input = input.slice(1);
   while (input.endsWith("/")) input = input.slice(0, -1);
   while (input.includes("//")) input = input.split("//").join("/");
+  if (input.startsWith("blog/category/")) input = input.slice(14);
+  if (input.startsWith("blog/")) input = input.slice(5);
 
   const parts = input.split("/").map((part) => {
     let out = "";
@@ -36,13 +38,12 @@ function fileSlug(item: any): string {
 }
 
 export function getBlogRouteSlug(item: any): string {
-  const raw = cleanSlug(item?.permalink) || fileSlug(item);
-  return raw.startsWith("blog/") ? raw.slice(5) : raw;
+  return cleanSlug(item?.permalink) || fileSlug(item);
 }
 
 export function getBlogPermalink(item: any): string {
   const slug = getBlogRouteSlug(item);
-  return slug ? "/blog/" + slug : "/blog";
+  return slug ? "/" + slug : "/blog";
 }
 
 export function getPageRouteSlug(item: any): string {

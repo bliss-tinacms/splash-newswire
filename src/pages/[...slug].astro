@@ -1,37 +1,387 @@
 ---
-import { getPageRouteSlug } from '../lib/permalinks';
+import { getBlogPermalink, getBlogRouteSlug, getPageRouteSlug } from '../lib/permalinks';
 import Base from '../layouts/Base.astro';
+import BlogPost from '../layouts/BlogPost.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
 import PageBody from '../components/islands/PageBody.astro';
-import { getConfig, getPublicPage, listPages } from '../lib/data';
+import BlogBody from '../components/islands/BlogBody.astro';
+import { getBlog, getConfig, getPage, getUser, listBlogs, listPages, type CmsBlog } from '../lib/data';
 import { islands } from '../lib/islands';
 
-export const prerender = false;
+export const prerender = true;
 
-const routeSlug = (Astro.params.slug ?? '').toString();
-const allPages = await listPages();
-const matchedPage = allPages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
-const documentSlug = matchedPage?._sys.filename ?? routeSlug;
-const page = await getPublicPage(documentSlug);
-const data = page.data?.page;
-if (!data) return new Response('Not Found', { status: 404 });
+const POSTS_PER_PAGE = 30;
+
+type ReferenceObject = {
+  title?: string | null;
+  name?: string | null;
+  _sys?: { filename?: string | null } | null;
+};
+
+function slugify(value?: string | null) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function titleCase(value?: string | null) {
+  return String(value || '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim();
+}
+
+function labelFromReference(reference: unknown) {
+  if (!reference) return null;
+  if (typeof reference === 'string') {
+    return titleCase(reference.split('/').pop()?.replace(/\.(json|mdx?)$/i, '') || '');
+  }
+  if (typeof reference === 'object') {
+    const item = reference as ReferenceObject;
+    return String(item.title || item.name || item._sys?.filename || '') || null;
+  }
+  return null;
+}
+
+function slugFromReference(reference: unknown) {
+  if (!reference) return null;
+  if (typeof reference === 'string') {
+    return slugify(reference.split('/').pop()?.replace(/\.(json|mdx?)$/i, '') || '');
+  }
+  if (typeof reference === 'object') {
+    const item = reference as ReferenceObject;
+    return slugify(item._sys?.filename || item.title || item.name || '');
+  }
+  return null;
+}
+
+function parseArchiveParam(value?: string) {
+  const parts = String(value || '').toLowerCase().split('/').filter(Boolean);
+  const pageIndex = parts.indexOf('page');
+  if (pageIndex >= 0) {
+    return {
+      slug: parts.slice(0, pageIndex).join('/'),
+      page: Math.max(1, Number(parts[pageIndex + 1] || '1') || 1),
+    };
+  }
+  return { slug: parts.join('/'), page: 1 };
+}
+
+function pagePath(basePath: string, page: number) {
+  return page <= 1 ? basePath + '/' : basePath + '/page/' + page + '/';
+}
+
+function getReferenceKey(reference: unknown) {
+  if (!reference) return null;
+  if (typeof reference === 'string') return reference;
+  if (typeof reference === 'object') {
+    const item = reference as { _sys?: { filename?: string | null } | null; title?: string | null; name?: string | null };
+    return item._sys?.filename || item.title || item.name || null;
+  }
+  return null;
+}
+
+function getAuthorName(reference: unknown) {
+  return labelFromReference(reference) || 'Splash Newswire Staff';
+}
+
+function getPostUrl(post: CmsBlog) {
+  return getBlogPermalink(post) + '/';
+}
+
+function categoryFileMap() {
+  const modules = import.meta.glob('../content/category/*.json', { eager: true });
+  const map = new Map<string, string>();
+
+  for (const [filePath, mod] of Object.entries(modules)) {
+    const filename = filePath.split('/').pop()?.replace(/\.json$/i, '') || '';
+    const data = ((mod as any).default || mod || {}) as { title?: string; name?: string };
+    const label = String(data.title || data.name || titleCase(filename));
+    const slug = slugify(filename || label);
+    if (slug) map.set(slug, label);
+  }
+
+  return map;
+}
+
+export async function getStaticPaths() {
+  const perPage = 30;
+  const slugifyLocal = (value?: string | null) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const titleCaseLocal = (value?: string | null) => String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()).trim();
+  const labelLocal = (reference: any) => {
+    if (!reference) return null;
+    if (typeof reference === 'string') return titleCaseLocal(reference.split('/').pop()?.replace(/\.(json|mdx?)$/i, '') || '');
+    return String(reference.title || reference.name || reference._sys?.filename || '') || null;
+  };
+  const slugLocal = (reference: any) => {
+    if (!reference) return null;
+    if (typeof reference === 'string') return slugifyLocal(reference.split('/').pop()?.replace(/\.(json|mdx?)$/i, '') || '');
+    return slugifyLocal(reference._sys?.filename || reference.title || reference.name || '');
+  };
+
+  const paths: Array<{ params: { slug: string }; props: Record<string, any> }> = [];
+  const used = new Set<string>();
+  const pages = await listPages();
+  const posts = await listBlogs();
+
+  for (const node of pages) {
+    if (node._sys.filename === 'home') continue;
+    const slug = getPageRouteSlug(node);
+    if (!slug || used.has(slug)) continue;
+    used.add(slug);
+    paths.push({ params: { slug }, props: { type: 'page', documentSlug: node._sys.filename } });
+  }
+
+  const groups = new Map<string, { title: string; count: number }>();
+  const categoryModules = import.meta.glob('../content/category/*.json', { eager: true });
+  for (const [filePath, mod] of Object.entries(categoryModules)) {
+    const filename = filePath.split('/').pop()?.replace(/\.json$/i, '') || '';
+    const data = ((mod as any).default || mod || {}) as { title?: string; name?: string };
+    const title = String(data.title || data.name || titleCaseLocal(filename));
+    const slug = slugifyLocal(filename || title);
+    if (slug) groups.set(slug, { title, count: 0 });
+  }
+
+  for (const post of posts) {
+    const slug = slugLocal(post.category);
+    const title = labelLocal(post.category);
+    if (!slug || !title) continue;
+    const current = groups.get(slug) || { title, count: 0 };
+    current.title = current.title || title;
+    current.count += 1;
+    groups.set(slug, current);
+  }
+
+  for (const [slug, group] of groups.entries()) {
+    if (used.has(slug)) continue;
+    const totalPages = Math.max(1, Math.ceil(group.count / perPage));
+    for (let page = 1; page <= totalPages; page++) {
+      const routeSlug = page === 1 ? slug : slug + '/page/' + page;
+      if (used.has(routeSlug)) continue;
+      used.add(routeSlug);
+      paths.push({
+        params: { slug: routeSlug },
+        props: { type: 'category', archiveTitle: group.title, archiveSlug: slug, postCount: group.count },
+      });
+    }
+  }
+
+  for (const node of posts) {
+    const slug = getBlogRouteSlug(node);
+    if (!slug || used.has(slug)) continue;
+    used.add(slug);
+    paths.push({ params: { slug }, props: { type: 'blog', documentSlug: node._sys.filename } });
+  }
+
+  return paths;
+}
+
+const routeSlug = (Astro.params.slug ?? '').toString().toLowerCase();
 const config = (await getConfig()).data?.config ?? null;
-const seo = data.seo ?? null;
-const title = seo?.metaTitle || data.seoTitle || config?.seo?.title || 'TinaCMS + Astro';
-const description = seo?.metaDescription || config?.seo?.description || 'Welcome to my website!';
+
+let routeType = Astro.props.type || null;
+let routeDocumentSlug = Astro.props.documentSlug || null;
+let routeArchiveTitle = Astro.props.archiveTitle || null;
+
+if (!routeType) {
+  const runtimePages = await listPages();
+  const runtimePage = runtimePages.find((page) => getPageRouteSlug(page) === routeSlug || page._sys.filename === routeSlug);
+  if (runtimePage) {
+    routeType = 'page';
+    routeDocumentSlug = runtimePage._sys.filename;
+  } else {
+    const runtimePosts = await listBlogs();
+    const parsed = parseArchiveParam(routeSlug);
+    const runtimeCategories = categoryFileMap();
+    const runtimeCategory = parsed.slug && (runtimeCategories.has(parsed.slug) || runtimePosts.some((post) => slugFromReference(post.category) === parsed.slug));
+    if (runtimeCategory) {
+      routeType = 'category';
+      routeArchiveTitle = labelFromReference(runtimePosts.find((post) => slugFromReference(post.category) === parsed.slug)?.category);
+    } else {
+      const runtimePost = runtimePosts.find((post) => getBlogRouteSlug(post) === routeSlug || post._sys.filename === routeSlug);
+      if (runtimePost) {
+        routeType = 'blog';
+        routeDocumentSlug = runtimePost._sys.filename;
+      }
+    }
+  }
+}
+
+let pageData: any = null;
+let pageTitle = '';
+let pageDescription = '';
+let blogData: any = null;
+let blogLayoutProps: any = null;
+let relatedPosts: CmsBlog[] = [];
+let defaultAuthor: any = null;
+let categoryProps: any = null;
+
+if (routeType === 'page') {
+  const page = await getPage(routeDocumentSlug);
+  pageData = page.data?.page;
+  if (!pageData) return new Response('Not Found', { status: 404 });
+  const seo = pageData.seo ?? null;
+  pageTitle = seo?.metaTitle || pageData.seoTitle || config?.seo?.title || 'TinaCMS + Astro';
+  pageDescription = seo?.metaDescription || config?.seo?.description || 'Welcome to my website!';
+} else if (routeType === 'blog') {
+  const allPosts = await listBlogs();
+  const matchedPost = allPosts.find((post) => getBlogRouteSlug(post) === routeSlug || post._sys.filename === routeSlug);
+  const documentSlug = routeDocumentSlug ?? matchedPost?._sys.filename ?? routeSlug;
+  const blog = await getBlog(documentSlug);
+  blogData = blog.data?.blog;
+  if (!blogData) return new Response('Not Found', { status: 404 });
+
+  const canonicalSource = matchedPost ?? blogData;
+  const canonicalSlug = getBlogRouteSlug(canonicalSource);
+  if (canonicalSlug && canonicalSlug !== routeSlug) {
+    return Astro.redirect(getBlogPermalink(canonicalSource) + '/', 301);
+  }
+
+  defaultAuthor = (await getUser('admin')).data?.user ?? null;
+  const currentCategoryKey = getReferenceKey(blogData.category);
+  relatedPosts = allPosts
+    .filter((post) => post._sys.filename !== documentSlug)
+    .filter((post) => currentCategoryKey && getReferenceKey(post.category) === currentCategoryKey)
+    .slice(0, 3);
+
+  const seo = blogData.seo ?? null;
+  const title = seo?.metaTitle || blogData.title || '';
+  const description = seo?.metaDescription || blogData.description || '';
+  blogLayoutProps = {
+    title,
+    description,
+    pubDate: blogData.pubDate ? new Date(blogData.pubDate) : new Date(),
+    updatedDate: blogData.updatedDate ? new Date(blogData.updatedDate) : undefined,
+    heroImage: seo?.ogImage || blogData.heroImage || null,
+    ogTitle: seo?.ogTitle || title,
+    ogDescription: seo?.ogDescription || description,
+    canonicalUrl: seo?.canonicalUrl || getBlogPermalink(canonicalSource) + '/',
+    noindex: seo?.noindex || false,
+    nofollow: seo?.nofollow || false,
+    documentSlug,
+  };
+} else if (routeType === 'category') {
+  const parsed = parseArchiveParam(routeSlug);
+  const categories = categoryFileMap();
+  const allPosts = (await listBlogs()).filter((post) => slugFromReference(post.category) === parsed.slug);
+  const totalPages = Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE));
+  const currentPage = Math.min(Math.max(1, parsed.page), totalPages);
+  const posts = allPosts.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+  const archiveTitle = labelFromReference(allPosts[0]?.category) || routeArchiveTitle || categories.get(parsed.slug) || titleCase(parsed.slug) || 'Category';
+  const basePath = '/' + parsed.slug;
+  const hasPosts = posts.length > 0;
+  categoryProps = {
+    parsed,
+    totalPages,
+    currentPage,
+    posts,
+    archiveTitle,
+    basePath,
+    hasPosts,
+    seoTitle: archiveTitle + ' Articles | ' + (config?.seo?.title || 'Splash Newswire'),
+    description: hasPosts
+      ? 'Read the latest ' + archiveTitle + ' articles from Splash Newswire.'
+      : 'Articles in the ' + archiveTitle + ' category will be published soon on Splash Newswire.',
+  };
+} else {
+  return new Response('Not Found', { status: 404 });
+}
 ---
 
-<Base
-  title={title}
-  description={description}
-  image={seo?.ogImage || undefined}
-  ogTitle={seo?.ogTitle || title}
-  ogDescription={seo?.metaDescription || description}
-  canonicalUrl={seo?.canonicalUrl || undefined}
-  noindex={seo?.noindex || false}
-  nofollow={seo?.nofollow || false}
->
-  <TinaIsland name="page" wrapper={islands.page.wrapper} params={{ slug: documentSlug }} primary>
-    <PageBody data={data} config={config} />
-  </TinaIsland>
-</Base>
+{routeType === 'page' && pageData && (
+  <Base
+    title={pageTitle}
+    description={pageDescription}
+    image={pageData.seo?.ogImage || undefined}
+    ogTitle={pageData.seo?.ogTitle || pageTitle}
+    ogDescription={pageData.seo?.metaDescription || pageDescription}
+    canonicalUrl={pageData.seo?.canonicalUrl || undefined}
+    noindex={pageData.seo?.noindex || false}
+    nofollow={pageData.seo?.nofollow || false}
+  >
+    <TinaIsland name="page" wrapper={islands.page.wrapper} params={{ slug: routeDocumentSlug }} primary>
+      <PageBody data={pageData} />
+    </TinaIsland>
+  </Base>
+)}
+
+{routeType === 'blog' && blogData && blogLayoutProps && (
+  <BlogPost {...blogLayoutProps}>
+    <TinaIsland name="blog" wrapper={islands.blog.wrapper} params={{ slug: blogLayoutProps.documentSlug }} primary>
+      <BlogBody data={blogData} relatedPosts={relatedPosts} defaultAuthor={defaultAuthor} />
+    </TinaIsland>
+  </BlogPost>
+)}
+
+{routeType === 'category' && categoryProps && (
+  <Base title={categoryProps.seoTitle} description={categoryProps.description} canonicalUrl={categoryProps.basePath + '/'}>
+    <main class="archive-template archive-template--category">
+      <header class="ah">
+        <div class="crumb">
+          <div class="archive-w">
+            <div class="crumb-in">
+              <a href="/blog/">Blog</a>
+              <i><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></i>
+              <a href="/blog/">Categories</a>
+              <i><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></i>
+              <span>{categoryProps.archiveTitle}</span>
+            </div>
+          </div>
+        </div>
+        <div class="archive-w">
+          <div class="ah-body">
+            <div>
+              <div class="ah-kick"><i></i><span>Category Archive</span></div>
+              <h1>{categoryProps.archiveTitle}</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid-s">
+        <div class="archive-w">
+          {categoryProps.hasPosts ? (
+            <div class="pg">
+              {categoryProps.posts.map((post: CmsBlog) => (
+                <a href={getPostUrl(post)} class="pc">
+                  {post.heroImage ? <div class="pc-img" style={'background-image:url(' + post.heroImage + ')'}></div> : <div class="pc-img pc-img--empty"></div>}
+                  <div class="pc-b">
+                    <div class="pc-k">{labelFromReference(post.category) || 'News'}</div>
+                    <div class="pc-t">{post.title}</div>
+                    {post.description && <p class="pc-x">{post.description}</p>}
+                    <div class="pc-m"><span class="pc-mn">{getAuthorName(post.author)}</span></div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div class="archive-empty">
+              <div class="archive-empty__eyebrow">No articles yet</div>
+              <h2>Articles in {categoryProps.archiveTitle} are coming soon.</h2>
+              <p>There are currently no published articles in this category. Please check back soon for official updates and newly published stories.</p>
+              <a href="/blog/">Browse all articles</a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {categoryProps.totalPages > 1 && (
+        <nav class="pag" aria-label="Archive pagination">
+          <div class="archive-w">
+            <div class="pag-in">
+              {categoryProps.currentPage > 1 && <a class="nx" href={pagePath(categoryProps.basePath, categoryProps.currentPage - 1)}>Prev</a>}
+              {Array.from({ length: categoryProps.totalPages }).map((_, index) => {
+                const page = index + 1;
+                return page === categoryProps.currentPage
+                  ? <a class="on" href={pagePath(categoryProps.basePath, page)}>{page}</a>
+                  : <a href={pagePath(categoryProps.basePath, page)}>{page}</a>;
+              })}
+              {categoryProps.currentPage < categoryProps.totalPages && <a class="nx" href={pagePath(categoryProps.basePath, categoryProps.currentPage + 1)}>Next</a>}
+            </div>
+          </div>
+        </nav>
+      )}
+    </main>
+  </Base>
+)}

@@ -11,43 +11,43 @@
       "children": [
         {
           "label": "National News",
-          "href": "/blog/category/news/"
+          "href": "/news/"
         },
         {
           "label": "Politics",
-          "href": "/blog/category/politics/"
+          "href": "/politics/"
         },
         {
           "label": "Business",
-          "href": "/blog/category/business/"
+          "href": "/business/"
         },
         {
           "label": "Economy",
-          "href": "/blog/category/economy/"
+          "href": "/economy/"
         },
         {
           "label": "Technology",
-          "href": "/blog/category/technology/"
+          "href": "/technology/"
         },
         {
           "label": "Health",
-          "href": "/blog/category/health/"
+          "href": "/health/"
         },
         {
           "label": "Science",
-          "href": "/blog/category/science/"
+          "href": "/science/"
         },
         {
           "label": "Lifestyle",
-          "href": "/blog/category/lifestyle/"
+          "href": "/lifestyle/"
         },
         {
           "label": "Culture",
-          "href": "/blog/category/culture/"
+          "href": "/culture/"
         },
         {
           "label": "Featured",
-          "href": "/blog/category/featured/"
+          "href": "/featured/"
         }
       ]
     },

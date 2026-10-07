@@ -7,7 +7,7 @@ export const CategoryCollection: Collection = {
   format: "json",
   ui: {
     router({ document }) {
-      return `/blog/category/${document._sys.filename}`;
+      return `/${document._sys.filename}/`;
     },
   },
   fields: [

@@ -52,7 +52,7 @@ function getReferenceSlug(reference: unknown) {
 }
 function getCategoryArchiveUrl(reference: unknown) {
 	const slug = getReferenceSlug(reference)?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-	return slug ? '/blog/category/' + slug + '/' : '/blog/';
+	return slug ? '/' + slug + '/' : '/blog/';
 }
 
 
@@ -62,7 +62,7 @@ function getAuthor(reference: unknown) {
 }
 
 function getPostUrl(post: CmsBlog) {
-	return `/blog/${post._sys.filename}/`;
+	return getBlogPermalink(post) + '/';
 }
 
 function getPostTitle(post: CmsBlog) {
