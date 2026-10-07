@@ -1,5 +1,5 @@
 ---
-import { getBlogPermalink, getBlogRouteSlug, getPageRouteSlug } from '../lib/permalinks';
+import { getBlogPermalink, getBlogRouteAliases, getBlogRouteSlug, getPageRouteSlug } from '../lib/permalinks';
 import Base from '../layouts/Base.astro';
 import BlogPost from '../layouts/BlogPost.astro';
 import TinaIsland from '@tinacms/astro/TinaIsland.astro';
@@ -168,7 +168,7 @@ export async function getStaticPaths() {
   }
 
   for (const node of posts) {
-    const slugs = Array.from(new Set([getBlogRouteSlug(node), node._sys.filename].filter(Boolean).map((value) => String(value).toLowerCase())));
+    const slugs = getBlogRouteAliases(node);
     for (const slug of slugs) {
       if (!slug || used.has(slug)) continue;
       used.add(slug);
@@ -201,7 +201,7 @@ if (!routeType) {
       routeType = 'category';
       routeArchiveTitle = labelFromReference(runtimePosts.find((post) => slugFromReference(post.category) === parsed.slug)?.category);
     } else {
-      const runtimePost = runtimePosts.find((post) => getBlogRouteSlug(post) === routeSlug || post._sys.filename === routeSlug);
+      const runtimePost = runtimePosts.find((post) => getBlogRouteAliases(post).includes(routeSlug));
       if (runtimePost) {
         routeType = 'blog';
         routeDocumentSlug = runtimePost._sys.filename;
@@ -228,7 +228,7 @@ if (routeType === 'page') {
   pageDescription = seo?.metaDescription || config?.seo?.description || 'Welcome to my website!';
 } else if (routeType === 'blog') {
   const allPosts = await listBlogs();
-  const matchedPost = allPosts.find((post) => getBlogRouteSlug(post) === routeSlug || post._sys.filename === routeSlug);
+  const matchedPost = allPosts.find((post) => getBlogRouteAliases(post).includes(routeSlug));
   const documentSlug = routeDocumentSlug ?? matchedPost?._sys.filename ?? routeSlug;
   const blog = await getBlog(documentSlug);
   blogData = blog.data?.blog;
@@ -236,8 +236,8 @@ if (routeType === 'page') {
 
   const canonicalSource = matchedPost ?? blogData;
   const canonicalSlug = getBlogRouteSlug(canonicalSource);
-  const filenameSlug = matchedPost?._sys?.filename ? String(matchedPost._sys.filename).toLowerCase() : '';
-  if (canonicalSlug && canonicalSlug !== routeSlug && filenameSlug !== routeSlug) {
+  const allowedAliases = matchedPost ? getBlogRouteAliases(matchedPost) : getBlogRouteAliases(blogData);
+  if (canonicalSlug && canonicalSlug !== routeSlug && !allowedAliases.includes(routeSlug)) {
     return Astro.redirect(getBlogPermalink(canonicalSource) + '/', 301);
   }
 

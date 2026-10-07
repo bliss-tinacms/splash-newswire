@@ -37,8 +37,20 @@ function fileSlug(item: any): string {
   return cleanSlug(item?._sys?.filename || item?._sys?.basename || item?.slug || "");
 }
 
+export function getTitleRouteSlug(item: any): string {
+  return cleanSlug(item?.title || item?.seoTitle || "");
+}
+
+export function getBlogRouteAliases(item: any): string[] {
+  return Array.from(new Set([
+    cleanSlug(item?.permalink),
+    getTitleRouteSlug(item),
+    fileSlug(item),
+  ].filter(Boolean)));
+}
+
 export function getBlogRouteSlug(item: any): string {
-  return cleanSlug(item?.permalink) || fileSlug(item);
+  return cleanSlug(item?.permalink) || getTitleRouteSlug(item) || fileSlug(item);
 }
 
 export function getBlogPermalink(item: any): string {
