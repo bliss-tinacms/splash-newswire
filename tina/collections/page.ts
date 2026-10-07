@@ -13,7 +13,8 @@ import { contactMockup17BlockSchema } from '../../src/components/blocks/contact-
 import { ourTeamMockup17BlockSchema } from '../../src/components/blocks/our-team-mockup17.template';
 import { seoFields } from '../fields/seo';
 import { viewFrontendField } from '../fields/view-frontend';
-import { homepageTemplateBlockSchema } from '../../src/components/blocks/homepage-template.template';
+import { homepageTemplateBlockSchema } from '../../src/components/blocks/homepage-template.template';
+
 
 function slugifyFilename(value?: string | null): string {
   if (!value || typeof value !== "string") return "untitled";
@@ -101,7 +102,17 @@ export const PageCollection: Collection = {
       isTitle: true,
       required: true,
       description: 'Main visible page title shown at the top of the frontend page.',
-    },
+    },
+    {
+      name: 'permalink',
+      label: 'Permalink / URL Slug',
+      type: 'string',
+      description: 'Optional lowercase public URL slug. Leave blank to use the filename.',
+      ui: {
+        parse: (value: string) => cleanPublicSlug(value),
+      },
+    },
+
     seoFields,
     {
       type: 'object',

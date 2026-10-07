@@ -71,6 +71,15 @@ export const BlogCollection: Collection = {
   fields: [
     viewFrontendField("blog"),
     { type: "string", name: "title", label: "Title", isTitle: true, required: true },
+    {
+      name: "permalink",
+      label: "Permalink / URL Slug",
+      type: "string",
+      description: "Optional lowercase public URL slug. Leave blank to use the filename. Do not include /blog/.",
+      ui: {
+        parse: (value: string) => cleanPublicSlug(value),
+      },
+    },
 
     { name: "description", label: "Description", type: "string" },
     seoFields,

@@ -95,7 +95,7 @@ function filenameFromBrowser(kind) {
 function resolveFrontendUrl(kind, values) {
   const raw = values?.permalink || values?._sys?.filename || values?.filename || filenameFromBrowser(kind) || values?.title || values?.seoTitle || "";
   const slug = normalizeSlug(raw);
-  if (kind === "blog") return slug ? "/blog/" + slug + "/" : "/blog/";
+  if (kind === "blog") return slug ? "/" + slug.replace(/^blog\//, "") + "/" : "/blog/";
   if (!slug || slug === "home" || slug === "index") return "/";
   return "/" + slug + "/";
 }
@@ -260,12 +260,21 @@ var BlogCollection = {
     router: ({ document }) => {
       const raw = cleanPublicSlug(document?.permalink) || filenameFromDocument(document);
       const slug = raw.startsWith("blog/") ? raw.slice(5) : raw;
-      return slug ? "/blog/" + slug : "/blog/";
+      return slug ? "/" + slug + "/" : "/blog/";
     }
   },
   fields: [
     viewFrontendField("blog"),
     { type: "string", name: "title", label: "Title", isTitle: true, required: true },
+    {
+      name: "permalink",
+      label: "Permalink / URL Slug",
+      type: "string",
+      description: "Optional lowercase public URL slug. Leave blank to use the filename. Do not include /blog/.",
+      ui: {
+        parse: (value) => cleanPublicSlug(value)
+      }
+    },
     { name: "description", label: "Description", type: "string" },
     seoFields,
     { name: "pubDate", label: "Publication Date", type: "datetime" },
@@ -299,7 +308,7 @@ var CategoryCollection = {
   format: "json",
   ui: {
     router({ document }) {
-      return `/blog/category/${document._sys.filename}`;
+      return `/${document._sys.filename.toLowerCase()}/`;
     }
   },
   fields: [
@@ -1095,6 +1104,15 @@ var PageCollection = {
       required: true,
       description: "Main visible page title shown at the top of the frontend page."
     },
+    {
+      name: "permalink",
+      label: "Permalink / URL Slug",
+      type: "string",
+      description: "Optional lowercase public URL slug. Leave blank to use the filename.",
+      ui: {
+        parse: (value) => cleanPublicSlug2(value)
+      }
+    },
     seoFields,
     {
       type: "object",
@@ -1130,7 +1148,7 @@ var UserCollection = {
   format: "json",
   ui: {
     router({ document }) {
-      return `/users/${document._sys.filename}`;
+      return `/blog/author/${document._sys.filename}/`;
     }
   },
   fields: [

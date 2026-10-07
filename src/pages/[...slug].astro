@@ -168,10 +168,12 @@ export async function getStaticPaths() {
   }
 
   for (const node of posts) {
-    const slug = getBlogRouteSlug(node);
-    if (!slug || used.has(slug)) continue;
-    used.add(slug);
-    paths.push({ params: { slug }, props: { type: 'blog', documentSlug: node._sys.filename } });
+    const slugs = Array.from(new Set([getBlogRouteSlug(node), node._sys.filename].filter(Boolean).map((value) => String(value).toLowerCase())));
+    for (const slug of slugs) {
+      if (!slug || used.has(slug)) continue;
+      used.add(slug);
+      paths.push({ params: { slug }, props: { type: 'blog', documentSlug: node._sys.filename } });
+    }
   }
 
   return paths;
@@ -234,7 +236,8 @@ if (routeType === 'page') {
 
   const canonicalSource = matchedPost ?? blogData;
   const canonicalSlug = getBlogRouteSlug(canonicalSource);
-  if (canonicalSlug && canonicalSlug !== routeSlug) {
+  const filenameSlug = matchedPost?._sys?.filename ? String(matchedPost._sys.filename).toLowerCase() : '';
+  if (canonicalSlug && canonicalSlug !== routeSlug && filenameSlug !== routeSlug) {
     return Astro.redirect(getBlogPermalink(canonicalSource) + '/', 301);
   }
 
